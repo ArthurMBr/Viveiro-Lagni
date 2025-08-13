@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = 'django-insecure-your-secret-key-here' # !!! MUDE ESTA CHAVE EM PRODUÇÃO !!!
 DEBUG = False
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'nomedoseudominio.com', '192.168.1.100']
+ALLOWED_HOSTS = ['ViveiroLagni0.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'admin_interface',
