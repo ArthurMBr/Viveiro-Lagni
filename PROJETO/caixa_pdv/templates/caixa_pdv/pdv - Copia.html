@@ -1,0 +1,692 @@
+{# viveiro_lagni\PROJETO\caixa_pdv\templates\caixa_pdv\pdv.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Variáveis CSS para facilitar a manutenção */
+    :root {
+        --primary-color: #28a745; /* Verde mais profissional */
+        --primary-dark: #218838;
+        --secondary-color: #6c757d; /* Cinza para detalhes */
+        --background-light: #f4f6f9; /* Fundo mais suave */
+        --panel-background: #ffffff; /* Fundo branco para os painéis */
+        --border-color: #e9ecef; /* Bordas suaves */
+        --text-dark: #343a40; /* Texto mais escuro para contraste */
+        --text-muted: #6c757d;
+        --box-shadow-light: 0 0.5rem 1rem rgba(0, 0, 0, 0.08); /* Sombra mais profissional */
+        --box-shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.04);
+        --border-radius-sm: 0.25rem;
+        --border-radius-md: 0.5rem;
+        --border-radius-lg: 0.75rem;
+        --danger-color: #dc3545;
+        --danger-dark: #c82333;
+        --action-button-bg: #9a9da0; /* Azul para botões de quantidade */
+        --action-button-dark: #a5a6a7;
+    }
+
+    body {
+        font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Fonte moderna */
+        background-color: var(--background-light);
+    }
+
+    .pdv-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem; /* Espaçamento entre os painéis */
+        padding: 1.5rem;
+        background-color: var(--background-light);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-light);
+        margin: 2.5rem auto;
+        max-width: 1200px;
+    }
+    .pdv-left-panel {
+        flex: 2;
+        min-width: 450px; /* Aumenta o tamanho mínimo para o painel de busca */
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        background-color: var(--panel-background);
+        box-shadow: var(--box-shadow-md);
+    }
+    .pdv-right-panel {
+        flex: 1;
+        min-width: 650px; /* Aumenta o tamanho mínimo para o carrinho */
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        background-color: var(--panel-background);
+        box-shadow: var(--box-shadow-light); /* Mais destaque para o painel do carrinho */
+    }
+
+    h2, h3 {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.75rem;
+    }
+
+    /* Estilos para o campo de busca */
+    #searchProductInput {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    box-sizing: border-box;
+    font-size: 0.95em;
+    background-color: #f9f9f9;
+    color: var(--text-muted);
+}
+    #searchProductInput:focus {
+        border-color: #a7d9b3; /* Cor de borda mais suave ao focar */
+        box-shadow: 0 0 0 0.05rem rgba(40, 167, 69, 0.1); /* Sombra mais sutil ao focar */
+        outline: none;
+    }
+
+    /* Estilos para a área de resultados da busca de lotes - MAIS DESTAQUE */
+    .product-list {
+        max-height: 600px; /* Aumentado para dar mais espaço */
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        padding: 0.75rem; /* Ajustado o padding interno */
+        margin-top: 1rem;
+        background-color: var(--background-light);
+    }
+    .lot-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid #f0f2f5; /* Linha mais suave */
+        gap: 1rem;
+        transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        border-radius: var(--border-radius-sm); /* Bordas arredondadas para cada item */
+        margin-bottom: 0.25rem; /* Pequeno espaçamento entre os itens */
+    }
+    .lot-item:hover {
+        background-color: #e9f0f7; /* Fundo mais destacado no hover */
+        transform: translateY(-2px); /* Efeito de elevação */
+        box-shadow: var(--box-shadow-md);
+    }
+    .lot-item:last-child {
+        border-bottom: none;
+    }
+    .lot-item img {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid #dcdfe3;
+        flex-shrink: 0;
+    }
+    .lot-info {
+        flex-grow: 1;
+    }
+    .lot-info strong {
+        font-size: 1.2em; /* Maior destaque para o nome do produto */
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        display: block; /* Garante que o strong ocupe sua própria linha */
+    }
+    .lot-info span {
+        font-size: 0.9em;
+        color: var(--text-muted);
+        display: block;
+        line-height: 1.4; /* Espaçamento entre as linhas */
+    }
+    /* Estilos do botão adicionar na busca (serão removidos)
+    .lot-item button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 500;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .lot-item button:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+    */
+
+    /* Estilos para a Venda Atual (Carrinho) */
+    #cartItems {
+        min-height: 180px;
+        max-height: 380px; /* Aumenta um pouco a altura do carrinho */
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        padding: 1rem;
+        margin-top: 1.25rem;
+        margin-bottom: 1.25rem;
+        background-color: var(--background-light);
+    }
+    #emptyCartMessage {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 1.5rem;
+        font-style: italic;
+    }
+    .cart-item {
+        display: flex;
+        align-items: center; /* Alinha itens verticalmente */
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e0e0e0;
+        font-size: 1em;
+        color: var(--text-dark);
+        gap: 1rem; /* Espaçamento entre a imagem e as informações */
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    .cart-item img {
+        width: 60px; /* Tamanho da imagem no carrinho */
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid #dcdfe3;
+        flex-shrink: 0;
+    }
+    .cart-item .cart-item-details { /* Novo wrapper para as informações textuais */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .cart-item .cart-item-details strong {
+        font-size: 1.1em;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+    .cart-item .cart-item-details span {
+        font-size: 0.85em;
+        color: var(--text-muted);
+        line-height: 1.3;
+    }
+    .cart-item .cart-item-controls { /* Wrapper para quantidade e botões remover/alterar */
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .cart-item .cart-item-controls .quantity-display {
+        font-size: 1em;
+        font-weight: 500;
+        color: var(--primary-dark);
+        min-width: 25px; /* Ajuste para caber o texto 'xN' */
+        text-align: center;
+        margin: 0 5px; /* Espaçamento entre o +/- e a quantidade */
+    }
+    .cart-item button.quantity-btn { /* Estilo para botões de + e - */
+        background-color: var(--action-button-bg);
+        color: white;
+        border: none;
+        padding: 0.2rem 0.5rem; /* Menor padding para botões pequenos */
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+        width: 30px; /* Largura fixa para botões + e - */
+        height: 30px; /* Altura fixa para botões + e - */
+        line-height: 1; /* Alinha o texto verticalmente */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .cart-item button.quantity-btn:hover {
+        background-color: var(--action-button-dark);
+    }
+    .cart-item button.remove-from-cart-btn {
+        background-color: var(--danger-color);
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: 0.8em;
+        transition: background-color 0.2s ease;
+    }
+    .cart-item button.remove-from-cart-btn:hover {
+        background-color: var(--danger-dark);
+    }
+    .cart-total {
+        font-size: 1.5em; /* Maior destaque para o total */
+        font-weight: bold;
+        text-align: right;
+        margin-top: 1rem;
+        color: var(--text-dark);
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .finalize-button {
+        width: 100%;
+        padding: 1rem;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-md);
+        cursor: pointer;
+        font-size: 1.2em;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .finalize-button:disabled {
+        background-color: #ced4da;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .finalize-button:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    /* Mensagens de feedback */
+    p#noResultsMessage, .product-list p {
+        color: var(--text-muted);
+        text-align: center;
+        padding: 1.25rem;
+    }
+    p[style*="color: red;"] {
+        color: var(--danger-color) !important;
+        font-weight: 500;
+    }
+
+    /* Media queries para responsividade */
+    @media (max-width: 992px) {
+        .pdv-left-panel, .pdv-right-panel {
+            flex: 1;
+            min-width: unset;
+        }
+    }
+    @media (max-width: 768px) {
+        .pdv-container {
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+        .pdv-left-panel, .pdv-right-panel {
+            min-width: unset;
+            padding: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">{{ page_title }}</h2>
+
+    <div class="pdv-container">
+        <div class="pdv-left-panel">
+            <h3>Buscar Lote</h3>
+            <input type="text" id="searchProductInput" placeholder="Buscar por código do lote ou nome do produto...">
+            <div class="product-list" id="lotSearchResults">
+                <p id="noResultsMessage" style="display: block;">Digite para pesquisar lotes...</p>
+                </div>
+        </div>
+
+        <div class="pdv-right-panel">
+            <h3>Venda Atual</h3>
+            <div id="cartItems">
+                <p id="emptyCartMessage">Nenhum item no carrinho.</p>
+            </div>
+            <div class="cart-total">
+                Total: R$ <span id="cartTotal">0.00</span>
+            </div>
+            <button class="finalize-button" id="finalizeSaleButton">Finalizar Venda</button>
+        </div>
+    </div>
+</div>
+<div id="finalizeSaleModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <button class="modal-close-btn" id="closeModalBtn">&times;</button>
+        <h3>Finalizar Venda</h3>
+        <p>Total da Venda: R$ <span id="modalSaleTotal">0.00</span></p>
+
+        <div class="form-group">
+            <label for="clientNameInput">Nome do Cliente (Opcional):</label>
+            <input type="text" id="clientNameInput" placeholder="Informe o nome do cliente">
+        </div>
+
+        <div class="form-group">
+            <label>Forma de Pagamento:</label>
+            <div class="payment-options">
+                <label>
+                    <input type="radio" name="paymentMethod" value="dinheiro" id="paymentDinheiro" checked> Dinheiro
+                </label>
+                <label>
+                    <input type="radio" name="paymentMethod" value="pix" id="paymentPix"> Pix
+                </label>
+            </div>
+        </div>
+
+        <div id="cashPaymentDetails">
+            <div class="form-group">
+                <label for="amountReceivedInput">Valor Recebido:</label>
+                <input type="number" id="amountReceivedInput" min="0" step="0.01" value="0.00">
+            </div>
+            <div class="form-group">
+                <label>Troco:</label>
+                <span id="changeAmount">R$ 0.00</span>
+            </div>
+        </div>
+
+        <div id="pixQrCodeDisplay" style="display: none;">
+            <p>Escaneie o QR Code para pagar o valor de R$ <span id="pixValueQrCode">0.00</span></p>
+            <img src="https://via.placeholder.com/150?text=QR+Code+Pix" alt="QR Code Pix" style="max-width: 150px; margin-top: 10px;">
+            <p style="font-size: 0.8em; margin-top: 10px;">(Simulação: Em um sistema real, um QR Code Pix seria gerado aqui.)</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" id="cancelModalBtn">Cancelar</button>
+            <button class="btn-confirm-sale" id="confirmFinalizeSaleBtn">Confirmar Venda</button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lotSearchResults = document.getElementById('lotSearchResults');
+        const cartItemsContainer = document.getElementById('cartItems');
+        const cartTotalSpan = document.getElementById('cartTotal');
+        const finalizeSaleButton = document.getElementById('finalizeSaleButton');
+        const emptyCartMessage = document.getElementById('emptyCartMessage');
+        const searchProductInput = document.getElementById('searchProductInput');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        let cart = []; // Array para armazenar os itens do carrinho
+
+        // Function to update the cart display and total
+        function updateCartDisplay() {
+            cartItemsContainer.innerHTML = ''; // Clear the cart display
+            let total = 0;
+
+            // Adicionado verificação de nulidade para emptyCartMessage e finalizeSaleButton
+            if (emptyCartMessage) {
+                if (cart.length === 0) {
+                    emptyCartMessage.style.display = 'block';
+                } else {
+                    emptyCartMessage.style.display = 'none';
+                }
+            }
+            if (finalizeSaleButton) {
+                finalizeSaleButton.disabled = (cart.length === 0);
+            }
+
+            if (cart.length > 0) {
+                cart.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('cart-item');
+                    const itemSubtotal = item.quantity * item.price;
+                    const imageUrl = item.imageUrl || "{% static 'img/default_product.png' %}"; // Usar a imagem armazenada ou uma padrão
+
+                    itemElement.innerHTML = `
+                        <img src="${imageUrl}" alt="${item.productName}">
+                        <div class="cart-item-details">
+                            <strong>${item.productName}</strong>
+                            <span>Lote: ${item.lotCode}</span>
+                            <span>Preço unitário: R$ ${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button data-lot-id="${item.lotId}" class="quantity-btn decrease-quantity-btn">-</button>
+                            <span class="quantity-display">x${item.quantity}</span>
+                            <button data-lot-id="${item.lotId}" class="quantity-btn increase-quantity-btn">+</button>
+                            <button data-lot-id="${item.lotId}" class="remove-from-cart-btn">Remover</button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(itemElement);
+                    total += itemSubtotal;
+                });
+            }
+            cartTotalSpan.textContent = total.toFixed(2);
+        }
+
+        // Function to add a lot to the cart
+        function addLotToCart(lotData) { // Agora recebe um objeto com todos os dados do lote
+            const lotId = lotData.id;
+            const lotCode = lotData.codigo_lote;
+            const productName = lotData.nome_produto;
+            const unitPrice = parseFloat(lotData.preco_unitario);
+            const stockQuantity = parseInt(lotData.quantidade_estoque);
+            const imageUrl = lotData.imagem_produto_url; // Nova propriedade
+
+            const existingItemIndex = cart.findIndex(item => item.lotId === lotId);
+
+            if (existingItemIndex > -1) {
+                if (cart[existingItemIndex].quantity < stockQuantity) {
+                    cart[existingItemIndex].quantity++;
+                } else {
+                    alert(`Quantidade máxima em estoque (${stockQuantity}) atingida para este lote.`);
+                }
+            } else {
+                if (stockQuantity > 0) {
+                    cart.push({
+                        lotId: lotId,
+                        lotCode: lotCode,
+                        productName: productName,
+                        price: unitPrice,
+                        quantity: 1,
+                        maxQuantity: stockQuantity,
+                        imageUrl: imageUrl // Adicionar a URL da imagem aqui
+                    });
+                } else {
+                    alert("Este lote não possui estoque disponível.");
+                }
+            }
+            updateCartDisplay();
+        }
+
+        // --- NEW FUNCTIONS FOR QUANTITY CONTROL ---
+
+        function changeItemQuantity(lotId, change) {
+            const itemIndex = cart.findIndex(item => item.lotId === lotId);
+            if (itemIndex > -1) {
+                const item = cart[itemIndex];
+                const newQuantity = item.quantity + change;
+
+                if (newQuantity > item.maxQuantity) {
+                    alert(`Não há estoque suficiente. Máximo disponível: ${item.maxQuantity} unids.`);
+                    return;
+                }
+                if (newQuantity <= 0) {
+                    // If quantity drops to 0 or less, remove item from cart
+                    cart.splice(itemIndex, 1);
+                } else {
+                    item.quantity = newQuantity;
+                }
+                updateCartDisplay();
+            }
+        }
+
+        // Event listener for quantity adjustment buttons
+        cartItemsContainer.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target.classList.contains('increase-quantity-btn')) {
+                const lotId = parseInt(target.dataset.lotId);
+                changeItemQuantity(lotId, 1);
+            } else if (target.classList.contains('decrease-quantity-btn')) {
+                const lotId = parseInt(target.dataset.lotId);
+                changeItemQuantity(lotId, -1);
+            } else if (target.classList.contains('remove-from-cart-btn')) { // Keep existing remove logic
+                const lotIdToRemove = parseInt(target.dataset.lotId);
+                const existingItemIndex = cart.findIndex(item => item.lotId === lotIdToRemove);
+
+                if (existingItemIndex > -1) {
+                    cart.splice(existingItemIndex, 1); // Remove item completely
+                }
+                updateCartDisplay();
+            }
+        });
+
+        // Event listener for finalizing the sale
+        finalizeSaleButton.addEventListener('click', function() {
+            if (cart.length === 0) {
+                alert("O carrinho está vazio. Adicione produtos antes de finalizar a venda.");
+                return;
+            }
+
+            if (!confirm("Confirmar a finalização desta venda?")) {
+                return;
+            }
+
+            const saleData = {
+                itens: cart.map(item => ({
+                    lote_id: item.lotId,
+                    quantidade: item.quantity,
+                    preco_unitario: item.price
+                }))
+            };
+
+            console.log("Dados da venda a serem enviados:", saleData);
+
+            fetch('{% url "caixa_pdv:finalizar_venda_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(saleData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'Erro desconhecido ao finalizar a venda.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert("Venda finalizada com sucesso! ID da Venda: " + data.venda_id);
+                    cart = [];
+                    updateCartDisplay();
+                    searchProductInput.value = '';
+                    performSearch(); // Re-execute search to clear or refresh results
+                } else {
+                    alert("Erro ao finalizar a venda: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Erro na requisição de finalizar venda:", error);
+                alert("Erro ao finalizar a venda: " + error.message);
+            });
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Function to perform lot search via API
+        function performSearch(autoAdd = false) { // Added autoAdd parameter
+            const query = searchProductInput.value.trim();
+            if (query.length < 2 && query.length !== 0) {
+                lotSearchResults.innerHTML = `<p class="text-muted">Digite pelo menos 2 caracteres para pesquisar.</p>`;
+                noResultsMessage.style.display = 'none';
+                return;
+            }
+             if (query.length === 0) {
+                lotSearchResults.innerHTML = '';
+                noResultsMessage.style.display = 'block';
+                return;
+            }
+
+            noResultsMessage.style.display = 'none';
+
+            fetch(`{% url "caixa_pdv:search_lotes_api" %}?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na requisição de busca.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    lotSearchResults.innerHTML = ''; // Clear old results
+                    if (data.lotes && data.lotes.length > 0) {
+                        data.lotes.forEach(lote => {
+                            const lotElement = document.createElement('div');
+                            lotElement.classList.add('lot-item');
+                            // Adicionando todos os dados do lote ao dataset para fácil acesso
+                            for (const key in lote) {
+                                lotElement.dataset[key] = lote[key];
+                            }
+
+                            const imageUrl = lote.imagem_produto_url || "{% static 'img/default_product.png' %}";
+
+                            lotElement.innerHTML = `
+                                <img src="${imageUrl}" alt="${lote.nome_produto}">
+                                <div class="lot-info">
+                                    <strong>${lote.nome_produto}</strong>
+                                    <span>Lote: ${lote.codigo_lote}</span>
+                                    <span>Estoque: ${lote.quantidade_estoque} unids.</span>
+                                    <span>Preço: R$ ${parseFloat(lote.preco_unitario).toFixed(2)}</span>
+                                </div>
+                                `;
+                            lotSearchResults.appendChild(lotElement);
+                        });
+
+                        // If autoAdd is true and exactly one result is found, add it to cart
+                        if (autoAdd && data.lotes.length === 1) { // Condição ajustada para === 1
+                            const lotData = data.lotes[0]; // Pega o objeto lote diretamente
+                            addLotToCart(lotData);
+                            searchProductInput.value = ''; // Clear input after adding
+                            performSearch(); // Clear the search results display
+                        }
+
+                    } else {
+                        lotSearchResults.innerHTML = '<p class="text-muted">Nenhum lote encontrado para esta busca.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na busca de lotes:', error);
+                    lotSearchResults.innerHTML = '<p style="color: var(--danger-color);">Erro ao buscar lotes. Tente novamente.</p>';
+                });
+        }
+
+        // Event listener for search box (with debounce)
+        let searchTimeout;
+        searchProductInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(false); // Don't auto-add on regular input
+            }, 300); // 300ms debounce
+        });
+
+        // Event listener for "Enter" key press on the search input
+        searchProductInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission
+                clearTimeout(searchTimeout); // Clear any pending debounce
+                performSearch(true); // Perform search and attempt to auto-add
+            }
+        });
+
+        // Initialize cart display
+        updateCartDisplay();
+    });
+</script>
+{% endblock %}
+{% endblock %}

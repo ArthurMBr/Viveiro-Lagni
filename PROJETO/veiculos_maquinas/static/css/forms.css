@@ -1,0 +1,73 @@
+/* viveiro_lagni/PROJETO/veiculos_maquinas/static/css/forms.css */
+
+/* Cores e variáveis base (redefinidas aqui para garantir consistência nos forms) */
+:root {
+    --primary-color: #6c757d; /* Um cinza médio */
+    --primary-dark: #5a6268;
+    --border-color: #dee2e6; /* Cor das bordas, um cinza bem claro */
+    --text-dark: #343a40; /* Cor padrão para textos escuros */
+    --panel-background: #ffffff; /* Fundo dos cards/painéis, branco puro */
+    --box-shadow-light: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.05); /* Sombra mais suave */
+    --border-radius-sm: 0.25rem; /* Bordas arredondadas pequenas */
+    --border-radius-md: 0.5rem;  /* Bordas arredondadas médias */
+}
+
+/* Estilos para cards de formulário */
+.form-card {
+    background-color: var(--panel-background);
+    padding: 30px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-light);
+    max-width: 700px; /* Limita a largura do formulário para melhor leitura */
+    margin: 30px auto; /* Centraliza o formulário na página */
+}
+
+/* Estilos para elementos de controle de formulário (inputs, selects, textareas) */
+.form-card .form-control {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    background-color: #fdfdfd; /* Um fundo bem leve para campos de input */
+    width: 100%; /* Garante que os campos ocupem 100% da largura do pai */
+    box-sizing: border-box; /* Inclui padding e border no cálculo da largura */
+}
+
+/* Estilos para o foco dos campos de formulário */
+.form-card .form-control:focus {
+    border-color: var(--primary-color); /* Borda do foco usando a cor primária (cinza) */
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25); /* Sombra do foco mais discreta (usando rgba do primary-color) */
+    outline: none; /* Remove o outline padrão do navegador */
+}
+
+/* Estilos para os rótulos (labels) dos campos */
+.form-card label {
+    font-weight: 500; /* Texto um pouco mais negrito */
+    color: var(--text-dark); /* Cor do texto padrão */
+    margin-bottom: 5px; /* Espaçamento abaixo do label */
+    display: block; /* Garante que o label ocupe sua própria linha */
+}
+
+/* Estilos para mensagens de ajuda (help text) */
+.form-text {
+    font-size: 0.875em; /* Texto menor */
+    color: var(--text-muted); /* Cor mais suave */
+    margin-top: 0.25rem; /* Espaçamento acima */
+}
+
+/* Estilos para mensagens de erro de validação */
+.invalid-feedback {
+    color: #dc3545; /* Vermelho padrão para erros */
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+.d-block {
+    display: block !important; /* Força a exibição para erros */
+}
+
+/* Estilos para botões dentro do formulário */
+.form-card .btn {
+    margin-right: 10px; /* Espaçamento entre botões */
+    padding: 10px 20px;
+    border-radius: var(--border-radius-md);
+    /* Cores de botão são geralmente herdadas do seu CSS principal do Bootstrap/base.css */
+}

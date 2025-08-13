@@ -1,0 +1,22 @@
+# Ignora o banco de dados SQLite
+*.sqlite3
+/db.sqlite3
+
+# Ignora o ambiente virtual
+/venv/
+.venv/
+env/
+
+# Ignora ficheiros de configuração sensíveis
+.env
+.env.production
+
+# Ignora ficheiros de migração que podem causar conflitos
+__pycache__/
+*.pyc
+
+# Ficheiros estáticos (gerados no deploy)
+/staticfiles/
+
+# Outros
+.DS_Store

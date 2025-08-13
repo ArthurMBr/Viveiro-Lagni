@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Finalizar Compra{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Finalizar Compra</h1>
+    <p>Preencha os dados abaixo para concluir seu pedido. Estes dados serão usados para contato e emissão da nota.</p>
+
+    <div class="card p-4">
+        <form action="{% url 'catalogo:processar_finalizacao' %}" method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_nome_loja" class="form-label">Nome da Loja <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="id_nome_loja" name="nome_loja" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_nome_pessoa" class="form-label">Nome da Pessoa <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="id_nome_pessoa" name="nome_pessoa" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_telefone" class="form-label">Telefone <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="id_telefone" name="telefone" required pattern="[0-9]{10,11}" title="O telefone deve ter 10 ou 11 dígitos, sem espaços ou caracteres especiais.">
+                <div class="form-text">Ex: 49988776655</div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'catalogo:carrinho_detalhe' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar ao Carrinho
+                </a>
+                <button type="submit" class="btn btn-success">
+                    Confirmar Pedido <i class="fas fa-check-circle ms-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

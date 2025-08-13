@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .dashboard-container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .dashboard-card .icon {
+            font-size: 3.5rem;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .dashboard-card p {
+            font-size: 0.95rem;
+            color: #6c757d;
+            line-height: 1.5;
+            min-height: 2.7em; /* NOVO: Garante altura mínima para 2 linhas de texto */
+            display: -webkit-box; /* NOVO: Essencial para -webkit-line-clamp */
+            -webkit-line-clamp: 2; /* NOVO: Limita o texto a 2 linhas e adiciona '...' */
+            -webkit-box-orient: vertical; /* NOVO: Essencial para -webkit-line-clamp */
+            overflow: hidden; /* NOVO: Esconde o texto que excede o limite */
+            text-overflow: ellipsis; /* NOVO: Adiciona '...' ao final do texto cortado */
+            line-clamp: 2; /* NOVO: Propriedade padrão (para navegadores modernos) */
+        }
+
+        .dashboard-card.produtos .icon { color: #17a2b8; }
+        .dashboard-card.lotes .icon { color: #ffc107; }
+        .dashboard-card.clientes .icon { color: #6f42c1; }
+        .dashboard-card.produtor .icon { color: #fd7e14; }
+        .dashboard-card.relatorios .icon { color: #007bff; }
+        .dashboard-card.admin .icon { color: #6c757d; }
+        .dashboard-card.caderno-campo .icon { color: #20c997; }
+        .dashboard-card.pdv .icon { color: #4285F4; } /* AJUSTADO: Usando a classe 'pdv' do HTML */
+        .dashboard-card.suprimentos .icon { color: #8a2be2; } /* Um tom de roxo/azul violeta */
+        .dashboard-card.veiculos .icon { color: #00bcd4; } /* Um tom de ciano */
+        .dashboard-card.pessoal .icon { color: #ffc107; } /* Um tom de roxo */
+        .dashboard-card.fornecedores .icon { color: #17a2b8; } /* Um tom de ciano/azul para fornecedores */
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <h1 class="mb-4">Bem-vindo ao Dashboard</h1>
+
+        <div class="dashboard-grid">
+            {# CARD PARA PRODUTOS #}
+            <a href="{% url 'produtos:list' %}" class="dashboard-card produtos">
+                <i class="fas fa-boxes icon"></i>
+                <h3>Gerenciar Produtos</h3>
+                <p>Veja e adicione os produtos do seu viveiro.</p>
+            </a>
+
+            {# CARD PARA LOTES #}
+            <a href="{% url 'lotes:lote_list' %}" class="dashboard-card lotes">
+                <i class="fas fa-th-large icon"></i>
+                <h3>Gerenciar Lotes</h3>
+                <p>Acompanhe seus lotes de produção.</p>
+            </a>
+
+            {# CARD PARA CLIENTES E FORNECEDORES #}
+            <a href="{% url 'clientes_fornecedores:cadastros_home' %}" class="dashboard-card clientes e fornecedores">
+                <i class="fas fa-address-card icon"></i>
+                <h3>Gerenciar Clientes e Fornecedores</h3>
+                <p>Administre o cadastro de clientes e fornecedores.</p>
+            </a>
+
+            {# NOVO CARD PARA PEDIDOS - ADICIONADO AQUI #}
+            <a href="#" class="dashboard-card pedidos">
+                <i class="fas fa-clipboard-list icon"></i>
+                <h3>Pedidos</h3>
+                <p>Acompanhe e gerencie todos os pedidos de vendas.</p>
+            </a>
+
+            {# CARD PARA CAIXA PDV - GARANTA QUE ESTÁ AQUI DENTRO #}
+            <a href="{% url 'caixa_pdv:historico_vendas' %}" class="dashboard-card pdv">
+                <i class="fas fa-cash-register icon"></i>
+                <h3>Caixa PDV</h3>
+                <p>Acesse o ponto de venda para registrar novas vendas.</p>
+            </a>
+
+            {# CARD PARA PRODUTOR RURAL #}
+            <a href="{% url 'produtores:detalhes_produtor' %}" class="dashboard-card produtor">
+                <i class="fas fa-industry icon"></i>
+                <h3>Produtor Rural</h3>
+                <p>Informações da sua empresa/produção e certificado.</p>
+            </a>
+
+            {# NOVO CARD PARA SUPRIMENTOS - ADICIONADO AQUI #}
+            <a href="#" class="dashboard-card suprimentos">
+                <i class="fas fa-tools icon"></i> {# Ícone de ferramentas ou suprimentos #}
+                <h3>Suprimentos</h3>
+                <p>Gerencie materiais, insumos e ferramentas.</p>
+            </a>
+
+            {# NOVO CARD PARA VEÍCULOS E MÁQUINAS - AJUSTADO AQUI #}
+            <a href="{% url 'veiculos_maquinas:menu' %}" class="dashboard-card veiculos">
+                <i class="fas fa-truck icon"></i> {# Ícone de caminhão ou veículo #}
+                <h3>Veículos e Máquinas</h3>
+                <p>Administre a frota, máquinas e manutenções.</p> {# Descrição alterada #}
+            </a>
+
+            {# NOVO BOTÃO/CARD: CADERNO DE CAMPO #}
+            <a href="#" class="dashboard-card caderno-campo">
+                <i class="fas fa-book-open icon"></i>
+                <h3>Caderno de Campo</h3>
+                <p>Registre e acompanhe atividades no campo.</p>
+            </a>
+
+            {# NOVO CARD PARA ETIQUETAS #}
+            <a href="{% url 'etiquetas:index' %}" class="dashboard-card etiquetas">
+                <i class="fas fa-tags icon"></i>
+                <h3>Etiquetas</h3>
+                <p>Gere e imprima etiquetas para seus produtos.</p>
+            </a>
+
+            {# NOVO CARD PARA PESSOAL #}
+            <a href="#" class="dashboard-card pessoal"> {# Usando '#' como placeholder de URL #}
+                <i class="fas fa-user-tie icon"></i> {# Ícone de pessoa com gravata, ou use fa-users para um grupo #}
+                <h3>Pessoal</h3>
+                <p>Gerencie funcionários e suas informações.</p>
+            </a>
+
+            {# CARD PARA RELATÓRIOS #}
+            <a href="{% url 'admin:index' %}" class="dashboard-card relatorios">
+                <i class="fas fa-chart-bar icon"></i>
+                <h3>Relatórios</h3>
+                <p>Análise de vendas e estoque.</p>
+            </a>
+
+            {# CARD PARA PAINEL DE ADMINISTRAÇÃO #}
+            <a href="{% url 'admin:index' %}" class="dashboard-card admin">
+                <i class="fas fa-cog icon"></i>
+                <h3>Painel de Administração</h3>
+                <p>Configurações e outras ferramentas do sistema.</p>
+            </a>
+
+    </div>
+</div>
+
+{% endblock %}

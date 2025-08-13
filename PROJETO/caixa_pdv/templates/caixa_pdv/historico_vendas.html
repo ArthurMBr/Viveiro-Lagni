@@ -1,0 +1,458 @@
+{# viveiro_lagni/PROJETO/caixa_pdv/templates/caixa_pdv/historico_vendas.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ---------------------------------------------------- */
+    /* PALETA DE CORES E ESTILOS GERAIS PARA ESTA PÁGINA */
+    /* ---------------------------------------------------- */
+    :root {
+        --primary-color: #6D4C41; /* Marrom Escuro (Brown) */
+        --secondary-color: #F8F4E3; /* Bege Suave */
+        --accent-color: #A3B5A6; /* Verde Sálvia */
+        --success-color: #5A8F6A; /* Verde Escuro para sucesso */
+        --danger-color: #DC3545; /* Vermelho para perigo */
+        --warning-color: #FFC107; /* Amarelo para aviso */
+        --info-color: #4682B4; /* Azul Aço para detalhes */
+        --text-color-dark: #343A40;
+        --text-color-light: #f8f9fa;
+        --background-light: #ffffff;
+        --card-background: #FDFDFD;
+        --border-color: #E0E0D4;
+        --border-radius-md: 0.5rem;
+        --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    body {
+        background-color: var(--secondary-color);
+    }
+
+    /* Estilos para o botão "+ Nova Venda" */
+    .new-sale-button {
+        background-color: var(--success-color);
+        color: var(--text-color-light);
+        padding: 10px 20px;
+        border: none;
+        border-radius: var(--border-radius-md);
+        cursor: pointer;
+        font-size: 16px;
+        margin-bottom: 20px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+    .new-sale-button:hover {
+        background-color: #497956;
+    }
+
+    /* Estilos gerais de Card e Filtros */
+    .card {
+        background-color: var(--card-background);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--box-shadow-light);
+    }
+    .card-header {
+        background-color: var(--accent-color);
+        color: var(--text-color-dark);
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    /* Estilos da Tabela */
+    .table-responsive {
+        background-color: var(--background-light);
+    }
+    .table thead th {
+        background-color: var(--primary-color);
+        color: var(--text-color-light);
+        vertical-align: middle;
+        text-align: center;
+        border-bottom: 2px solid #5D3E35;
+    }
+    .table tbody tr:hover {
+        background-color: #F0F0E8;
+    }
+    .table td, .table th {
+        vertical-align: middle;
+        text-align: center;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Estilos para os Botões da Tabela */
+    .btn-action {
+        margin: 2px;
+        font-size: 0.85rem;
+        border-radius: var(--border-radius-md);
+        border: 1px solid transparent;
+        transition: background-color 0.3s ease;
+    }
+    .btn-detail {
+        background-color: var(--info-color);
+        color: var(--text-color-light);
+    }
+    .btn-detail:hover {
+        background-color: #117A8B;
+    }
+    .btn-delete {
+        background-color: var(--danger-color);
+        color: var(--text-color-light);
+    }
+    .btn-delete:hover {
+        background-color: #C82333;
+    }
+    /* Estilo para o novo botão de termo */
+    .btn-termo {
+        background-color: var(--accent-color); /* Usando o verde sálvia */
+        color: var(--text-color-dark);
+    }
+    .btn-termo:hover {
+        background-color: #92A394;
+    }
+
+
+    /* Estilos para Botões de Filtro e Paginação */
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: var(--text-color-light);
+        border-color: var(--primary-color);
+    }
+    .btn-primary:hover {
+        background-color: #5D3E35;
+        border-color: #5D3E35;
+    }
+    .btn-outline-secondary {
+        color: var(--text-color-dark);
+        border-color: var(--accent-color);
+    }
+    .btn-outline-secondary:hover {
+        background-color: var(--accent-color);
+        color: var(--text-color-dark);
+        border-color: var(--accent-color);
+    }
+    .pagination-section .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .pagination-section .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: var(--text-color-light);
+    }
+
+    /* Estilos para o Modal */
+    #saleDetailsModal .modal-header {
+        background-color: var(--accent-color);
+        color: var(--text-color-dark);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Estilos para Badges (Tags de status) */
+    .badge-status {
+        font-size: 0.8em;
+        padding: 0.5em 0.8em;
+        border-radius: 20px;
+        color: white;
+    }
+    .badge-status-success {
+        background-color: var(--success-color);
+    }
+    .badge-status-warning {
+        background-color: var(--warning-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<form id="csrfForm" style="display:none">{% csrf_token %}</form>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Histórico de Vendas</h1>
+    <a href="{% url 'caixa_pdv:pdv' %}" class="new-sale-button">
+        <i class="fas fa-plus me-1"></i> Nova Venda
+    </a>
+</div>
+    
+<div class="container mt-4 mb-5">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Filtrar Vendas</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Data Início:</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">Data Fim:</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-3">
+                    <label for="clientName" class="form-label">Nome Cliente:</label>
+                    <input type="text" class="form-control" id="clientName" placeholder="Nome do Cliente">
+                </div>
+                <div class="col-md-3">
+                    <label for="saleId" class="form-label">ID da Venda:</label>
+                    <input type="text" class="form-control" id="saleId" placeholder="Ex: 123">
+                </div>
+                <div class="col-12 text-end">
+                    <button id="applyFiltersBtn" class="btn btn-primary me-2"><i class="fas fa-search"></i> Aplicar Filtros</button>
+                    <button id="clearFiltersBtn" class="btn btn-outline-secondary"><i class="fas fa-eraser"></i> Limpar Filtros</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Vendas Realizadas</h4>
+            <span class="badge bg-secondary" id="totalSalesCount">0</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID Venda</th>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Forma Pgto.</th>
+                            <th>Observações</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <tr><td colspan="8">Carregando histórico de vendas...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination-section d-flex justify-content-center align-items-center">
+        <button id="prevPageBtn" class="btn btn-outline-primary me-2" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+        <span class="mx-2">Página <span id="currentPage">1</span> de <span id="totalPages">1</span></span>
+        <button id="nextPageBtn" class="btn btn-outline-primary ms-2"><i class="fas fa-chevron-right"></i> Próxima</button>
+    </div>
+</div>
+
+<div class="modal fade" id="saleDetailsModal" tabindex="-1" aria-labelledby="saleDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saleDetailsModalLabel">Detalhes da Venda #<span id="modalSaleId"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Data:</strong> <span id="modalSaleDate"></span></p>
+                <p><strong>Cliente:</strong> <span id="modalSaleClient"></span></p>
+                <p><strong>Forma de Pagamento:</strong> <span id="modalSalePaymentMethod"></span></p>
+                <p><strong>Observações:</strong> <span id="modalSaleObservations"></span></p>
+                <p><strong>Total:</strong> <span id="modalSaleTotal"></span></p>
+                <hr>
+                <h6>Itens da Venda:</h6>
+                <ul id="modalSaleItems" class="list-group item-list">
+                    </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const salesTableBody = document.getElementById('salesTableBody');
+        const totalSalesCount = document.getElementById('totalSalesCount');
+        const currentPageSpan = document.getElementById('currentPage');
+        const totalPagesSpan = document.getElementById('totalPages');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const clientNameInput = document.getElementById('clientName');
+        const saleIdInput = document.getElementById('saleId');
+
+        let currentPage = 1;
+        const pageSize = 10; 
+
+        // Função para buscar e renderizar as vendas
+        async function fetchAndRenderSales() {
+            salesTableBody.innerHTML = '<tr><td colspan="8">Carregando histórico de vendas...</td></tr>';
+            const params = new URLSearchParams({
+                page: currentPage,
+                page_size: pageSize
+            });
+
+            if (startDateInput.value) params.append('start_date', startDateInput.value);
+            if (endDateInput.value) params.append('end_date', endDateInput.value);
+            if (clientNameInput.value) params.append('client_name', clientNameInput.value);
+            if (saleIdInput.value) params.append('venda_id', saleIdInput.value);
+
+            try {
+                const response = await fetch(`{% url 'caixa_pdv:search_vendas_api' %}?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    salesTableBody.innerHTML = '';
+                    if (data.vendas.length === 0) {
+                        salesTableBody.innerHTML = '<tr><td colspan="8">Nenhuma venda encontrada com os filtros aplicados.</td></tr>';
+                    } else {
+                        data.vendas.forEach(venda => {
+                            const statusClass = venda.status.toLowerCase() === 'finalizada' ? 'badge-status-success' : 'badge-status-warning';
+                            const row = salesTableBody.insertRow();
+                            row.innerHTML = `
+                                <td>${venda.id}</td>
+                                <td>${venda.data_venda}</td>
+                                <td>${venda.nome_cliente}</td>
+                                <td>${venda.forma_pagamento}</td>
+                                <td>${venda.observacoes}</td>
+                                <td>R$ ${venda.total_venda}</td>
+                                <td><span class="badge badge-status ${statusClass}">${venda.status}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-detail btn-action" data-bs-toggle="modal" data-bs-target="#saleDetailsModal" data-sale='${JSON.stringify(venda)}'>
+                                        <i class="fas fa-eye"></i> Detalhes
+                                    </button>
+                                    <button class="btn btn-sm btn-termo btn-action" onclick="window.open('{% url 'caixa_pdv:termo_conformidade_pdf' 0 %}'.replace('0', ${venda.id}), '_blank')">
+                                        <i class="fas fa-file-pdf"></i> Termo
+                                    </button>
+                                    <button class="btn btn-sm btn-delete btn-action" data-sale-id="${venda.id}">
+                                        <i class="fas fa-trash-alt"></i> Apagar
+                                    </button>
+                                </td>
+                            `;
+                        });
+                    }
+
+                    totalSalesCount.textContent = data.total_vendas;
+                    currentPageSpan.textContent = data.pagina_atual;
+                    totalPagesSpan.textContent = data.total_paginas;
+
+                    prevPageBtn.disabled = data.pagina_atual === 1;
+                    nextPageBtn.disabled = data.pagina_atual === data.total_paginas;
+
+                } else {
+                    salesTableBody.innerHTML = `<tr><td colspan="8" class="text-danger">${data.message || 'Erro ao carregar vendas.'}</td></tr>`;
+                    alert('Erro ao carregar vendas: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar vendas:', error);
+                salesTableBody.innerHTML = `<tr><td colspan="8" class="text-danger">Erro de rede ao buscar vendas.</td></tr>`;
+                alert('Erro de rede ao buscar vendas. Verifique sua conexão.');
+            }
+        }
+
+        // Event Listeners para Paginação
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchAndRenderSales();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            currentPage++;
+            fetchAndRenderSales();
+        });
+
+        // Event Listeners para Filtros
+        applyFiltersBtn.addEventListener('click', () => {
+            currentPage = 1;
+            fetchAndRenderSales();
+        });
+
+        clearFiltersBtn.addEventListener('click', () => {
+            startDateInput.value = '';
+            endDateInput.value = '';
+            clientNameInput.value = '';
+            saleIdInput.value = '';
+            currentPage = 1;
+            fetchAndRenderSales();
+        });
+
+
+        // Lidar com o clique no botão "Apagar"
+        salesTableBody.addEventListener('click', async (event) => {
+            if (event.target.closest('.btn-delete')) {
+                const button = event.target.closest('.btn-delete');
+                const saleId = button.dataset.saleId;
+
+                if (confirm(`Tem certeza que deseja apagar a Venda #${saleId}? Esta ação é irreversível e restaurará o estoque.`)) {
+                    try {
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; 
+                        
+                        const response = await fetch(`{% url 'caixa_pdv:delete_venda_api' 0 %}`.replace('0', saleId), {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': csrfToken, 
+                                'Content-Type': 'application/json' 
+                            },
+                        });
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            alert(data.message);
+                            fetchAndRenderSales();
+                        } else {
+                            alert('Erro ao apagar venda: ' + (data.message || 'Detalhes do erro desconhecidos.'));
+                        }
+                    } catch (error) {
+                        console.error('Erro na requisição de apagar venda:', error);
+                        alert('Erro de rede ao apagar venda. Verifique sua conexão.');
+                    }
+                }
+            }
+        });
+
+        // Lidar com a abertura do modal de detalhes da venda
+        const saleDetailsModal = document.getElementById('saleDetailsModal');
+        saleDetailsModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const saleData = JSON.parse(button.dataset.sale);
+
+            document.getElementById('modalSaleId').textContent = saleData.id;
+            document.getElementById('modalSaleDate').textContent = saleData.data_venda;
+            document.getElementById('modalSaleClient').textContent = saleData.nome_cliente;
+            document.getElementById('modalSalePaymentMethod').textContent = saleData.forma_pagamento;
+            document.getElementById('modalSaleObservations').textContent = saleData.observacoes;
+            document.getElementById('modalSaleTotal').textContent = `R$ ${saleData.total_venda}`;
+
+            const modalSaleItemsList = document.getElementById('modalSaleItems');
+            modalSaleItemsList.innerHTML = '';
+
+            if (saleData.itens && saleData.itens.length > 0) {
+                saleData.itens.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                    listItem.innerHTML = `
+                        <div>
+                            <strong>${item.produto_nome}</strong> (${item.lote_codigo})
+                            <br><small>${item.quantidade} x R$ ${item.preco_unitario_vendido}</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">R$ ${item.subtotal}</span>
+                    `;
+                    modalSaleItemsList.appendChild(listItem);
+                });
+            } else {
+                modalSaleItemsList.innerHTML = '<li class="list-group-item">Nenhum item encontrado para esta venda.</li>';
+            }
+        });
+
+        fetchAndRenderSales();
+    });
+</script>
+{% endblock %}

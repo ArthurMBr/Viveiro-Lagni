@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Fornecedor: {{ fornecedor }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalhes do Fornecedor</h2>
+        <div>
+            <a href="{% url 'clientes_fornecedores:fornecedor_update' fornecedor.pk %}" class="btn btn-primary">Editar</a>
+            <a href="{% url 'clientes_fornecedores:fornecedor_delete' fornecedor.pk %}" class="btn btn-danger">Excluir</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            Informações do Fornecedor
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Nome da Empresa:</strong> {{ fornecedor.nome_empresa|default:"-" }}</li>
+            <li class="list-group-item"><strong>Nome do Contato:</strong> {{ fornecedor.nome_contato|default:"-" }}</li>
+            <li class="list-group-item"><strong>CNPJ:</strong> {{ fornecedor.cpf_cnpj|default:"-" }}</li>
+            <li class="list-group-item"><strong>Telefone:</strong> {{ fornecedor.telefone|default:"-" }}</li>
+            <li class="list-group-item"><strong>Email:</strong> {{ fornecedor.email|default:"-" }}</li>
+            <li class="list-group-item"><strong>Endereço:</strong> {{ fornecedor.endereco|default:"-" }}</li>
+            <li class="list-group-item"><strong>Cidade:</strong> {{ fornecedor.cidade|default:"-" }}</li>
+            <li class="list-group-item"><strong>Estado:</strong> {{ fornecedor.estado|default:"-" }}</li>
+            <li class="list-group-item"><strong>Observações:</strong> {{ fornecedor.observacoes|default:"-" }}</li>
+            <li class="list-group-item"><strong>Produtos Fornecidos:</strong>
+                <ul>
+                    {% for produto in fornecedor.produtos_fornecidos.all %}
+                        <li>{{ produto.variedade }}</li>
+                    {% empty %}
+                        <li>Nenhum produto associado.</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'clientes_fornecedores:fornecedor_list' %}" class="btn btn-secondary">Voltar para a lista</a>
+    </div>
+</div>
+{% endblock %}

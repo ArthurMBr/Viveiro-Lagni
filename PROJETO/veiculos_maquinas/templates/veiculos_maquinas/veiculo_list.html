@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %} {# <-- ESTA LINHA DEVE VIR AQUI, LOGO APÓS O EXTENDS! #}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_head %}
+     {# O caminho aqui não deve ter o 'static/' extra #}
+     <link rel="stylesheet" href="{% static 'css/veiculos_maquinas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="list-container"> {# Use o container list-container para os novos estilos #}
+    <div class="list-panel"> {# Use o painel para o conteúdo #}
+        <div class="list-header"> {# Cabeçalho para título e botão #}
+            <h2>{{ page_title }}</h2>
+            <a href="{% url 'veiculos_maquinas:veiculo_create' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i> Adicionar Novo Veículo
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Placa</th>
+                        <th>Modelo</th>
+                        <th>Ano</th>
+                        <th>Combustível</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for veiculo in veiculos %}
+                    <tr>
+                        <td>{{ veiculo.nome }}</td>
+                        <td>{{ veiculo.placa|default:"N/A" }}</td>
+                        <td>{{ veiculo.modelo|default:"N/A" }}</td>
+                        <td>{{ veiculo.ano_fabricacao|default:"N/A" }}</td>
+                        <td>{{ veiculo.get_tipo_combustivel_display }}</td>
+                        <td>
+                            <a href="{% url 'veiculos_maquinas:veiculo_update' veiculo.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                            <a href="{% url 'veiculos_maquinas:veiculo_delete' veiculo.pk %}" class="btn btn-sm btn-danger">Excluir</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="no-records">Nenhum veículo cadastrado.</td> {# Adicionado classe no-records #}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

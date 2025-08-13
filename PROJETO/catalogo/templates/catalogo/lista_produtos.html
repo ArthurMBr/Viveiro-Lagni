@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Produtos - Viveiro Lagni</title>
+
+    <link rel="stylesheet" href="{% static 'catalogo/css/catalog_styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> {# Para o ícone de semente e carrinho #}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {# Removida importação da fonte AgencyFB e de qualquer fonte do Google Fonts aqui, seguindo o novo base.html #}
+    
+    {# Importa o Bootstrap Bundle JS (inclui Popper) para o funcionamento do menu responsivo #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+</head>
+<body class="d-flex flex-column min-vh-100"> {# Classes para layout sticky footer #}
+    <header class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm"> {# Classes do base.html #}
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'catalogo:lista_produtos' %}"> {# Caminho para a lista de produtos #}
+                <i class="fas fa-seedling me-2"></i>Viveiro Lagni {# Ícone e texto do logo #}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto"> {# ms-auto para alinhar à direita #}
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="{% url 'catalogo:lista_produtos' %}">Produtos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon-badge" href="#" id="open-cart-sidebar-btn">
+                            <i class="fas fa-shopping-cart"></i> Carrinho
+                            <span class="cart-count" id="cart-item-count">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+    <h1>Nossos Produtos</h1>
+    
+    <div class="search-container">
+        <form class="search-form" method="GET" action="{% url 'catalogo:lista_produtos' %}">
+            <input type="text" class="search-input" name="q" placeholder="Pesquisar produtos..." value="{{ query|default:'' }}">
+            <button type="submit" class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+
+    {% csrf_token %}
+    
+    <div class="product-grid"> {# REMOVIDOS OS COMENTÁRIOS HTML AQUI #}
+        {% for produto in produtos %}
+        <div class="product-card">
+            {% if produto.imagem %}
+                <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="product-card-image">
+            {% else %}
+                <img src="{% static 'catalogo/images/placeholder_produto.png' %}" alt="Sem Imagem" class="product-card-image">
+            {% endif %}
+            <div class="product-card-content">
+                <h3 class="product-card-title">{{ produto.variedade }}</h3>
+                <p class="product-card-description">{{ produto.descricao|truncatechars:100 }}</p>
+                <p class="product-card-price">R$ {{ produto.preco|floatformat:2 }}</p>
+                <button class="btn btn-primary add-to-cart-btn" data-product-id="{{ produto.id }}" data-quantidade="1">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+    <footer class="footer"> {# Nova classe de rodapé do style.css #}
+        <p>&copy; 2025 Viveiro Lagni. Todos os direitos reservados.</p>
+    </footer>
+
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="sidebar-header">
+            <h3>Seu Carrinho</h3>
+            <button class="close-sidebar-btn" id="close-cart-sidebar-btn">&times;</button>
+        </div>
+        <div class="sidebar-body" id="sidebar-cart-content">
+            <p>Carregando carrinho...</p>
+        </div>
+        <div class="sidebar-footer">
+            <div class="cart-summary">
+                <p class="total-text">Total:</p>
+                <p class="total-amount" id="sidebar-cart-total">R$ 0.00</p>
+            </div>
+            <a href="{% url 'catalogo:carrinho_detalhe' %}" class="btn btn-secondary">Ver Carrinho Completo</a>
+            <button class="btn btn-success btn-checkout-sidebar">Finalizar Compra</button>
+        </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+
+    <script>
+        $(document).ready(function() {
+            const csrftoken = $('[name=csrfmiddlewaretoken]').val();
+
+            // Função para carregar/atualizar o conteúdo do carrinho (sidebar)
+            function loadCartContent() {
+                $.ajax({
+                    url: '{% url "catalogo:obter_conteudo_carrinho" %}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#sidebar-cart-content').html(response.html);
+                        $('#sidebar-cart-total').text('R$ ' + parseFloat(response.total_carrinho).toFixed(2));
+                        $('#cart-item-count').text(response.item_count);
+                    },
+                    error: function(xhr) {
+                        console.error('Erro ao carregar conteúdo do carrinho:', xhr.responseText);
+                        $('#sidebar-cart-content').html('<p style="color: var(--error-color);">Erro ao carregar o carrinho.</p>');
+                    }
+                });
+            }
+
+            // Abre a sidebar do carrinho
+            function openSidebar() {
+                $('#cart-sidebar').addClass('open');
+                $('#overlay').addClass('active');
+                loadCartContent(); // Recarrega o conteúdo do carrinho ao abrir
+            }
+
+            // Fecha a sidebar do carrinho
+            function closeSidebar() {
+                $('#cart-sidebar').removeClass('open');
+                $('#overlay').removeClass('active');
+            }
+
+            // Evento para abrir a sidebar (clicando no ícone do carrinho no header)
+            $('#open-cart-sidebar-btn').on('click', function(e) {
+                e.preventDefault();
+                openSidebar();
+            });
+
+            // Evento para fechar a sidebar (clicando no 'X' ou no overlay)
+            $('#close-cart-sidebar-btn, #overlay').on('click', function() {
+                closeSidebar();
+            });
+
+            // Adicionar ao Carrinho
+            $('.add-to-cart-btn').on('click', function() {
+                const productId = $(this).data('product-id');
+                const quantidade = $(this).data('quantidade');
+
+                $.ajax({
+                    url: '{% url "catalogo:adicionar_ao_carrinho" %}',
+                    type: 'POST',
+                    data: {
+                        'produto_id': productId,
+                        'quantidade': quantidade,
+                        'csrfmiddlewaretoken': csrftoken
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#cart-item-count').text(response.item_count); // Atualiza o contador de itens no header
+                            openSidebar(); // Abre o carrinho lateral automaticamente
+                        } else {
+                            alert('Erro: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Erro ao adicionar ao carrinho: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Lógica para botões de aumentar/diminuir quantidade e input de mudança (dentro da sidebar)
+            // Esses eventos precisam ser delegados, pois o conteúdo do carrinho é carregado dinamicamente
+            $(document).on('change', '#sidebar-cart-content .item-qty-input', function() {
+                const itemKey = $(this).data('item-key');
+                let newQuantity = parseInt($(this).val());
+                
+                if (isNaN(newQuantity) || newQuantity < 0) {
+                    newQuantity = 0; 
+                    $(this).val(0);
+                }
+
+                $.ajax({
+                    url: '{% url "catalogo:atualizar_quantidade_carrinho" %}',
+                    type: 'POST',
+                    data: {
+                        'item_key': itemKey,
+                        'quantidade': newQuantity,
+                        'csrfmiddlewaretoken': csrftoken
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            loadCartContent(); // Recarrega o conteúdo completo da sidebar para atualizar totais e itens
+                        } else {
+                            alert('Erro ao atualizar quantidade: ' + response.message);
+                            loadCartContent(); // Recarrega para restaurar a quantidade anterior em caso de erro
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Erro de conexão ao atualizar quantidade: ' + xhr.responseText);
+                        loadCartContent(); 
+                    }
+                });
+            });
+
+            $(document).on('click', '#sidebar-cart-content .update-qty-btn', function() {
+                const input = $(this).siblings('.item-qty-input');
+                let currentQty = parseInt(input.val());
+                const action = $(this).data('action');
+
+                if (action === 'increase') {
+                    currentQty++;
+                } else if (action === 'decrease' && currentQty > 0) {
+                    currentQty--;
+                }
+                input.val(currentQty).trigger('change');
+            });
+
+            // Remover item do carrinho (dentro da sidebar)
+            $(document).on('click', '#sidebar-cart-content .remove-item-btn', function() {
+                const itemKey = $(this).data('item-key');
+                $.ajax({
+                    url: '{% url "catalogo:remover_do_carrinho" %}',
+                    type: 'POST',
+                    data: {
+                        'item_key': itemKey,
+                        'csrfmiddlewaretoken': csrftoken
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            loadCartContent(); // Recarrega o conteúdo completo da sidebar
+                        } else {
+                            alert('Erro ao remover: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Erro de conexão ao remover: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Botão Finalizar Compra da sidebar
+            $('.btn-checkout-sidebar').on('click', function(e) {
+            e.preventDefault(); // Previne o comportamento padrão
+            // Redireciona para a página do carrinho para que o usuário possa rever os itens
+            window.location.href = '{% url "catalogo:carrinho_detalhe" %}'; 
+        });
+
+        // ...
+        loadCartContent();
+    });
+        
+    </script>
+</body>
+</html>

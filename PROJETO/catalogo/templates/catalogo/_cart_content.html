@@ -1,0 +1,45 @@
+{% load static %}
+{% load humanize %}
+
+{# NOVO: Local para mensagens de erro/sucesso do carrinho lateral #}
+<div id="cart-message-sidebar" class="alert-message" style="display: none;"></div>
+
+{% if itens_carrinho %}
+    <div class="cart-items-list">
+        {% for item in itens_carrinho %}
+            <div class="cart-item">
+                <div class="item-image">
+                    {% if item.produto.imagem %}
+                        <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}">
+                    {% else %}
+                        <img src="{% static 'catalogo/images/placeholder_produto.png' %}" alt="Sem Imagem">
+                    {% endif %}
+                </div>
+                <div class="item-details">
+                    <h4 class="item-name">{{ item.variedade }}</h4>
+                    <p class="item-price">R$ {{ item.preco_unitario|floatformat:2 }}</p>
+                    <div class="item-quantity-control">
+                        <button class="quantity-btn update-qty-btn" data-action="decrease" data-item-key="{{ item.item_key }}">-</button>
+                        <input type="number" class="item-quantity-input item-qty-input" value="{{ item.quantidade }}" min="0" data-item-key="{{ item.item_key }}">
+                        <button class="quantity-btn update-qty-btn" data-action="increase" data-item-key="{{ item.item_key }}">+</button>
+                    </div>
+                    <p class="item-subtotal">Subtotal: R$ <span class="subtotal-value" data-item-key="{{ item.item_key }}">{{ item.subtotal|floatformat:2 }}</span></p>
+                </div>
+                <button class="item-remove-btn remove-item-btn" data-item-key="{{ item.item_key }}" aria-label="Remover item">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-cart-section" style="box-shadow: none; border: none; padding: var(--spacing-md);">
+        <h3 class="empty-cart-message">Seu carrinho está vazio.</h3>
+        <div class="empty-cart-illustration">
+            <img src="{% static 'catalogo/images/cart_empty_icon.svg' %}" alt="Carrinho Vazio">
+            <p>Adicione alguns produtos incríveis para começar!</p>
+            <a href="{% url 'catalogo:lista_produtos' %}" class="btn btn-primary">Ver Produtos</a>
+        </div>
+    </div>
+    
+{% endif %}

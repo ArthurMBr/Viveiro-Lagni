@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Excluir Fornecedor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Excluir Fornecedor</h2>
+    <p>Tem certeza de que deseja excluir o fornecedor "<strong>{{ fornecedor }}</strong>"?</p>
+    <p>Esta ação é irreversível.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+        <a href="{% url 'clientes_fornecedores:fornecedor_detail' fornecedor.pk %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

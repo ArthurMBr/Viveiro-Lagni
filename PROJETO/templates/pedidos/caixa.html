@@ -1,0 +1,853 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caixa PDV</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+
+  <style>
+    /* Variáveis CSS para Cores */
+    :root {
+      --primary-color: #4CAF50; /* Verde vibrante */
+      --primary-dark: #388E3C;
+      --secondary-color: #2196F3; /* Azul para detalhes */
+      --text-color: #333;
+      --light-text-color: #666;
+      --background-color: #F8F9FA; /* Fundo mais claro */
+      --card-background: #FFFFFF;
+      --border-color: #E0E0E0;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      --red-delete: #DC3545;
+      --red-delete-dark: #C82333;
+      --grey-qty: #6C757D;
+      --grey-qty-dark: #5A6268;
+    }
+
+    /* Reset básico e tipografia */
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 2em;
+      background: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1 {
+      color: var(--primary-dark);
+      text-align: center;
+      margin-bottom: 1.5em;
+      font-size: 2.2em;
+      letter-spacing: -0.5px;
+      margin-top: 0; /* Garante que não tenha margem superior indesejada */
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5em;
+      color: var(--primary-dark);
+    }
+
+    /* --- PAINEL SUPERIOR HORIZONTAL --- */
+    .top-controls-panel {
+      background: var(--card-background);
+      padding: 1em 1.5em; /* Reduzindo o padding vertical */
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin: 0 auto 2em auto; /* Centraliza e adiciona margem inferior */
+      max-width: 1200px; /* Alinha com o main-container */
+
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2em;
+      align-items: center; /* ALINHA OS ITENS AO CENTRO VERTICALMENTE */
+      position: relative; /* Adicionado para posicionamento do botão de exportar */
+    }
+
+    .top-controls-panel .form-group {
+        flex: 1;
+        min-width: 200px;
+        margin-bottom: 0;
+        /* predicted-code styles removed, so no need for position: relative here */
+    }
+
+    /* Regra para o form-group do cliente ser mais largo */
+    .top-controls-panel .cliente-form-group {
+        flex: 1.5;
+        min-width: 250px;
+    }
+
+    .top-controls-panel #scanner {
+      width: 100%;
+      max-width: none;
+    }
+
+    /* Layout principal dos painéis (abaixo do painel superior) */
+    .main-container {
+      display: flex;
+      gap: 2em;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      align-items: flex-start;
+    }
+
+    .panel {
+      flex: 1;
+      background: var(--card-background);
+      padding: 1.5em;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      min-width: 300px;
+      display: flex; /* Adicionado para flexbox */
+      flex-direction: column; /* Itens um abaixo do outro */
+    }
+
+    .right-panel {
+      flex: 1;
+    }
+
+    /* Campos de Formulário */
+    .form-group label {
+      display: block;
+      margin-bottom: .4em; /* Reduzido um pouco o margin-bottom */
+      font-weight: 500;
+      color: var(--light-text-color);
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+      width: calc(100% - 1.2em);
+      padding: .7em; /* Reduzido o padding */
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95em; /* Ligeiramente reduzido a fonte para economizar espaço */
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    /* Select2 customização */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        height: 38px; /* Ajustado para a altura do input */
+        padding: 0.2em 0.5em; /* Ajuste para o texto interno */
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0.5em;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    /* Botões */
+    button {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: .8em 1.5em;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease, transform 0.1s ease;
+      font-size: 1em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      background: var(--primary-dark);
+      transform: translateY(0);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Botão de Finalizar Venda */
+    #checkout {
+      width: 100%;
+      margin-top: auto; /* Empurra para o final do painel flex */
+      padding: 1em 1.5em;
+      font-size: 1.1em;
+    }
+
+    /* Botão de Limpar Carrinho (novo) */
+    #clear-cart {
+      background: var(--red-delete); /* Cor vermelha para "limpar" */
+      margin-top: 1em; /* Espaçamento entre o total e o botão */
+      width: 100%;
+      padding: 1em 1.5em;
+      font-size: 1.1em;
+      margin-bottom: 1em; /* Espaçamento entre ele e o finalizar venda */
+    }
+
+    #clear-cart:hover {
+      background: var(--red-delete-dark);
+    }
+
+
+    /* Tabela de itens */
+    #item-list {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 1.5em;
+      font-size: 0.95em;
+      flex-grow: 1; /* Permite que a tabela cresça e ocupe o espaço disponível */
+    }
+
+    #item-list th, #item-list td {
+      padding: 0.9em 1.2em;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    #item-list th {
+      background: var(--background-color);
+      font-weight: 600;
+      color: var(--light-text-color);
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.5px;
+    }
+
+    #item-list tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    #item-list tbody tr:hover {
+      background-color: #F0F0F0;
+    }
+
+    /* Controles de quantidade e remover */
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+
+    .qty-controls button {
+      background: var(--grey-qty);
+      padding: .2em .6em;
+      font-size: 1em;
+      border-radius: 4px;
+      margin: 0;
+      min-width: 25px;
+      height: 25px;
+    }
+    .qty-controls button:hover {
+      background: var(--grey-qty-dark);
+    }
+    .qty-display {
+      min-width: 25px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--primary-dark);
+    }
+
+    .delete-btn {
+      background: var(--red-delete);
+      padding: .2em .6em;
+      font-size: 0.9em;
+      border-radius: 4px;
+      margin: 0;
+    }
+    .delete-btn:hover {
+      background: var(--red-delete-dark);
+    }
+
+    /* Seção de Total */
+    .total-section {
+      text-align: right;
+      margin-top: 1.5em;
+      padding-top: 1em;
+      border-top: 1px solid var(--border-color);
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .total-section span {
+      color: var(--primary-color);
+      margin-left: 0.5em;
+    }
+
+    /* Mensagem de sucesso */
+    .success-message {
+      background-color: #D4EDDA;
+      color: #155724;
+      border: 1px solid #C3E6CB;
+      padding: 15px 20px;
+      margin-bottom: 2em;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .success-message #codigo-pedido-value {
+        font-weight: 700;
+        color: #0F5132;
+    }
+
+    /* Estilos para as opções de exportação dentro da mensagem de sucesso */
+    .success-message #exportOptions {
+        margin-top: 10px;
+    }
+
+    .success-message #exportPdfLink,
+    .success-message #exportExcelLink {
+        padding: 8px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-right: 10px;
+        display: none; /* Oculto por padrão, será mostrado pelo JS */
+    }
+
+    .success-message #exportPdfLink {
+        background-color: #DC3545; /* Cor para PDF (vermelho) */
+        color: white;
+    }
+
+    .success-message #exportExcelLink {
+        background-color: #28A745; /* Cor para Excel (verde) */
+        color: white;
+    }
+
+    /* predicted-code styles removed */
+
+    /* Estilos para o botão Exportar e suas opções (no painel superior) */
+    .export-button-container {
+        position: absolute; /* Posição absoluta em relação ao top-controls-panel */
+        top: 1em; /* Ajuste para a altura desejada */
+        right: 1.5em; /* Ajuste para a direita */
+        z-index: 20; /* Para garantir que fique acima de outros elementos */
+    }
+
+    .export-button-container .export-btn {
+        background-color: var(--secondary-color); /* Um azul para exportar */
+        padding: 0.5em 1em; /* Botão menor */
+        font-size: 0.9em;
+        border-radius: 6px;
+        min-width: unset; /* Remove min-width do botão geral */
+        height: unset; /* Remove height do botão geral */
+    }
+
+    .export-button-container .export-btn:hover {
+        background-color: #1A7BBF; /* Azul mais escuro no hover */
+    }
+
+    .export-options {
+        position: absolute;
+        top: calc(100% + 5px); /* Abaixo do botão */
+        right: 0;
+        background: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        box-shadow: var(--shadow);
+        padding: 0.5em 0;
+        display: none; /* Oculto por padrão */
+        flex-direction: column;
+        min-width: 120px;
+        z-index: 21; /* Acima do botão e do predicted-code */
+    }
+
+    .export-options.show {
+        display: flex; /* Exibe quando a classe 'show' é adicionada */
+    }
+
+    .export-options a {
+        padding: 0.6em 1em;
+        text-decoration: none;
+        color: var(--text-color);
+        display: block;
+        transition: background-color 0.2s;
+    }
+
+    .export-options a:hover {
+        background-color: var(--background-color);
+    }
+
+
+    /* Media Queries para Responsividade */
+    @media (max-width: 900px) {
+      .main-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .panel {
+        flex: none;
+        width: 100%;
+        margin-bottom: 1.5em;
+      }
+      .top-controls-panel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5em;
+        padding: 1.5em;
+      }
+      .top-controls-panel .form-group,
+      .top-controls-panel .cliente-form-group {
+        width: 100%;
+        min-width: unset;
+      }
+      /* Ajusta a posição do botão de exportar em telas menores */
+      .export-button-container {
+        position: relative; /* Volta para o fluxo normal */
+        width: 100%; /* Ocupa a largura total */
+        text-align: right; /* Alinha o botão à direita */
+        margin-bottom: 1em; /* Adiciona margem abaixo */
+        top: unset;
+        right: unset;
+      }
+      .export-options {
+        top: unset; /* Remove posicionamento fixo */
+        right: unset;
+        width: 100%; /* Ocupa largura total */
+        left: 0;
+        margin-top: 0.5em; /* Espaçamento abaixo do botão */
+      }
+      body {
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+        margin-bottom: 1em;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #item-list th, #item-list td {
+        padding: 0.6em 0.8em;
+        font-size: 0.85em;
+      }
+      .qty-controls button {
+        padding: .1em .4em;
+        font-size: 0.9em;
+      }
+      .delete-btn {
+        padding: .2em .5em;
+        font-size: 0.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Caixa PDV</h1>
+
+  <div class="success-message" id="success-message">
+    Venda finalizada com sucesso! Código do Pedido: <span id="codigo-pedido-value"></span>
+    <div id="exportOptions" style="margin-top: 10px;">
+        <a id="exportPdfLink" href="#" target="_blank" class="button" style="background-color: #dc3545; color: white; padding: 8px 12px; border-radius: 4px; text-decoration: none; margin-right: 10px; display: none;">Exportar PDF</a>
+        <a id="exportExcelLink" href="#" target="_blank" class="button" style="background-color: #28a745; color: white; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: none;">Exportar Excel</a>
+    </div>
+  </div>
+
+  <div class="top-controls-panel">
+    <div class="form-group cliente-form-group">
+      <label for="cliente-select">Cliente:</label>
+      <div>
+        <select id="cliente-select" style="width: 100%;"></select>
+        {# PREDICTED CODE REMOVED #}
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="data-venda">Data do Pedido:</label>
+      <input type="date" id="data-venda" value="{{ data_hoje }}">
+    </div>
+    <div class="form-group">
+      <label for="scanner">Código do Lote (Bipar):</label>
+      <input type="text" id="scanner" placeholder="Leia o código de barras do lote">
+    </div>
+
+    <div class="export-button-container">
+      <button class="export-btn" id="export-button">Exportar</button>
+      <div class="export-options" id="export-options">
+        <a href="#" id="export-pdf">PDF</a>
+        <a href="#" id="export-excel">Excel</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="panel right-panel">
+      <h2>Itens no Carrinho</h2>
+      <table id="item-list">
+        <thead>
+          <tr>
+            <th>Lote Cód.</th>
+            <th>Produto</th>
+            <th>Preço Unit.</th>
+            <th>Qtd</th>
+            <th>Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="cart-items-body">
+          </tbody>
+      </table>
+      <div class="total-section">
+        Total do Pedido: <span id="grand-total">R$ 0,00</span>
+      </div>
+      <button id="clear-cart">Limpar Carrinho</button>
+      <button id="checkout">Finalizar Venda</button>
+    </div>
+  </div>
+
+  {# ESTA LINHA É CRUCIAL: json_script cria uma tag script invisível com os dados JSON #}
+  {# Ela PRECISA estar ANTES do script que tenta ler esses dados. #}
+  {{ lote_list|json_script:"lote-list-data" }}
+
+  <script>
+    // Recupera os dados JSON da tag script invisível
+    const rawLotesJson = document.getElementById('lote-list-data');
+    const ALL_LOTES_ARRAY = rawLotesJson ? JSON.parse(rawLotesJson.textContent) : [];
+
+    // Transforma ALL_LOTES_ARRAY em um mapa para buscas rápidas pelo 'codigo' do lote
+    const LOTES_BY_CODE = new Map();
+    ALL_LOTES_ARRAY.forEach(lote => {
+        LOTES_BY_CODE.set(lote.codigo, lote);
+    });
+
+    const scanner = document.getElementById('scanner');
+    const tbody = document.getElementById('cart-items-body');
+    const grandTotalSpan = document.getElementById('grand-total');
+    const clienteSelect = $('#cliente-select'); // JQuery object
+    const dataVendaInput = document.getElementById('data-venda'); // Novo campo de data
+    const successMessage = document.getElementById('success-message');
+    const codigoPedidoValue = document.getElementById('codigo-pedido-value');
+    // predictedCodeDisplay removed
+    const clearCartButton = document.getElementById('clear-cart');
+
+    // Elementos do botão de exportar (no top-controls-panel)
+    const exportButton = document.getElementById('export-button');
+    const exportOptions = document.getElementById('export-options');
+    // Elementos dos links de exportação (na success-message)
+    const exportPdfLink = document.getElementById('exportPdfLink');
+    const exportExcelLink = document.getElementById('exportExcelLink');
+
+
+    // Mapeamento de itens no carrinho por PK do lote para controle de quantidade
+    const cartItems = new Map(); // Key: lote_pk, Value: { lote: {}, quantity: N, element: trElement }
+
+    // selectedClienteCodigo and related logic for predicted code removed
+
+    // Função para formatar números como moeda BRL
+    const formatBR = (value) => {
+        return new Decimal(value).toFixed(2).replace('.', ',');
+    };
+
+    // Atualiza o total geral do carrinho
+    const updateGrand = () => {
+      let total = new Decimal(0);
+      cartItems.forEach(item => {
+          total = total.plus(new Decimal(item.lote.preco_unitario).times(item.quantity));
+      });
+      grandTotalSpan.textContent = `R$ ${formatBR(total)}`;
+    };
+
+    // Adiciona ou incrementa um item no carrinho
+    const addOrIncrement = (loteCode) => {
+      const lote = LOTES_BY_CODE.get(loteCode);
+
+      if (!lote) {
+        alert('Lote não encontrado ou indisponível.');
+        return;
+      }
+
+      const lotePk = lote.pk;
+
+      if (cartItems.has(lotePk)) {
+        // Item já está no carrinho, incrementa a quantidade
+        const item = cartItems.get(lotePk);
+        item.quantity++; // Incrementa localmente
+        const currentLoteInDb = LOTES_BY_CODE.get(loteCode); // Get latest stock
+        if (item.quantity > currentLoteInDb.quantidade) { // Check against current DB stock
+            alert(`Quantidade máxima para o lote ${lote.codigo} atingida. Disponível: ${currentLoteInDb.quantidade}`);
+            item.quantity--; // Reverte a quantidade
+            return;
+        }
+        item.element.querySelector('.qty-display').textContent = item.quantity;
+        item.element.querySelector('.tot').textContent = formatBR(new Decimal(item.lote.preco_unitario).times(item.quantity));
+        item.element.dataset.qty = item.quantity; // Atualiza o dataset para o envio
+      } else {
+        // Novo item no carrinho
+        if (lote.quantidade < 1) { // Verifica se há estoque para adicionar 1
+            alert(`Lote ${lote.codigo} sem estoque disponível.`);
+            return;
+        }
+        const tr = document.createElement('tr');
+        tr.dataset.pk = lote.pk;
+        tr.dataset.qty = 1;
+
+        const displayProductName = lote.produto__nome_completo_display || 'Produto Desconhecido';
+
+        tr.innerHTML = `
+          <td>${lote.codigo}</td>
+          <td>${displayProductName}</td>
+          <td>R$ ${formatBR(lote.preco_unitario)}</td>
+          <td>
+            <div class="qty-controls">
+              <button class="decrease-qty" data-pk="${lote.pk}">-</button>
+              <span class="qty-display">1</span>
+              <button class="increase-qty" data-pk="${lote.pk}">+</button>
+            </div>
+          </td>
+          <td class="tot">R$ ${formatBR(new Decimal(lote.preco_unitario).times(1))}</td>
+          <td><button class="delete-btn" data-pk="${lote.pk}">Remover</button></td>
+        `;
+        tbody.appendChild(tr);
+        cartItems.set(lotePk, { lote: lote, quantity: 1, element: tr });
+
+        // Adiciona listeners para os novos botões
+        tr.querySelector('.decrease-qty').addEventListener('click', handleQuantityChange);
+        tr.querySelector('.increase-qty').addEventListener('click', handleQuantityChange);
+        tr.querySelector('.delete-btn').addEventListener('click', handleDeleteItem);
+      }
+      updateGrand();
+    };
+
+    // Handlers para os botões de quantidade e exclusão
+    const handleQuantityChange = (e) => {
+        const pk = parseInt(e.target.dataset.pk);
+        const item = cartItems.get(pk);
+        if (!item) return;
+
+        const currentLoteInDb = LOTES_BY_CODE.get(item.lote.codigo); // Get latest stock
+        if (!currentLoteInDb) { // Lote pode ter sido removido ou não encontrado
+            alert('Lote não encontrado no sistema.');
+            // Opcional: remover o item do carrinho se o lote não existe mais
+            item.element.remove();
+            cartItems.delete(pk);
+            updateGrand();
+            return;
+        }
+
+        if (e.target.classList.contains('increase-qty')) {
+            if (item.quantity < currentLoteInDb.quantidade) { // Check against current DB stock
+                item.quantity++;
+            } else {
+                alert(`Quantidade máxima para o lote ${item.lote.codigo} atingida. Disponível: ${currentLoteInDb.quantidade}`);
+            }
+        } else if (e.target.classList.contains('decrease-qty')) {
+            item.quantity--;
+            if (item.quantity <= 0) {
+                // Se a quantidade for 0 ou menos, remove o item
+                item.element.remove();
+                cartItems.delete(pk);
+            }
+        }
+
+        if (cartItems.has(pk)) { // Se o item ainda estiver no carrinho
+            item.element.querySelector('.qty-display').textContent = item.quantity;
+            item.element.querySelector('.tot').textContent = formatBR(new Decimal(item.lote.preco_unitario).times(item.quantity));
+            item.element.dataset.qty = item.quantity;
+        }
+        updateGrand();
+    };
+
+    const handleDeleteItem = (e) => {
+        const pk = parseInt(e.target.dataset.pk);
+        const item = cartItems.get(pk);
+        if (item) {
+            item.element.remove();
+            cartItems.delete(pk);
+            updateGrand();
+        }
+    };
+
+
+    scanner.addEventListener('keyup', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const code = scanner.value.trim();
+        if (code) addOrIncrement(code);
+        scanner.value = ''; // Limpa o campo do scanner após adicionar
+      }
+    });
+
+    // generatePredictedOrderCode function removed
+
+    // Inicialização do Select2
+    clienteSelect.select2({
+      placeholder: 'Selecione um cliente',
+      allowClear: true,
+      ajax: {
+        url: '{% url "pedidos:search_clientes_ajax" %}',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term // search term
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: data.results.map(item => {
+                // Mapeia para o formato Select2 esperado e armazena o código do cliente
+                return {
+                    id: item.id,
+                    text: item.text
+                    // codigo_cliente: item.codigo_cliente // Removed as it's not needed for predicted code
+                };
+            })
+          };
+        },
+        cache: true
+      },
+      minimumInputLength: 1
+    });
+
+    // Listener para prever o código do pedido ao selecionar um cliente removed
+    // clienteSelect.on('select2:select', function (e) { ... });
+    // Limpa a previsão quando o cliente é deselecionado removed
+    // clienteSelect.on('select2:unselect', function (e) { ... });
+    // Listener para a mudança da data da venda removed
+    // dataVendaInput.addEventListener('change', generatePredictedOrderCode);
+
+    // Novo: Listener para o botão Limpar Carrinho
+    clearCartButton.addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja limpar todos os itens do carrinho?')) {
+            tbody.innerHTML = ''; // Limpa o HTML do carrinho
+            cartItems.clear(); // Limpa o Map de itens
+            updateGrand(); // Atualiza o total para R$ 0,00
+            alert('Carrinho limpo!');
+        }
+    });
+
+    // Finalizar Venda
+    document.getElementById('checkout').addEventListener('click', () => {
+      const clienteId = Number(clienteSelect.val());
+      const dataVenda = dataVendaInput.value;
+      if (!clienteId) {
+        alert('Selecione um cliente!'); return;
+      }
+      if (!dataVenda) {
+        alert('Selecione a data do pedido!'); return;
+      }
+      const items = Array.from(cartItems.values()).map(item => ({
+        lote_pk: item.lote.pk,
+        quantidade: item.quantity
+      }));
+      if (!items.length) {
+        alert('Adicione itens antes de finalizar!'); return;
+      }
+      console.log('Enviando:', { cliente_id: clienteId, data_venda: dataVenda, items: items });
+      fetch(window.location.pathname, {
+        method:'POST', credentials:'same-origin',
+        headers:{ 'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}' },
+        body: JSON.stringify({ cliente_id: clienteId, data_venda: dataVenda, items: items })
+      })
+      .then(resp => {
+        if (!resp.ok) return resp.json().then(err => { throw new Error(err.error || `Erro ${resp.status}: ${resp.statusText}`); });
+        return resp.json();
+      })
+      .then(data => {
+        codigoPedidoValue.textContent = data.codigo_pedido; // Supondo que a resposta tenha 'codigo_pedido'
+        successMessage.style.display = 'block';
+        tbody.innerHTML = ''; // Limpa o HTML do carrinho
+        cartItems.clear(); // Limpa o Map de itens
+        updateGrand();
+        clienteSelect.val(null).trigger('change');
+        dataVendaInput.value = '{{ data_hoje }}'; // Reseta a data para a data atual
+        scanner.value = '';
+        scanner.focus();
+        // predictedCodeDisplay.textContent = ''; // Limpa a previsão - Removed
+
+        // AQUI: Atualiza os links de exportação com o ID do pedido recém-criado
+        if (data.pedido_id) {
+            exportPdfLink.href = `/pedidos/exportar-pdf/${data.pedido_id}/`;
+            exportExcelLink.href = `/pedidos/exportar-excel/${data.pedido_id}/`;
+            exportPdfLink.style.display = 'inline-block'; // Mostra o link
+            exportExcelLink.style.display = 'inline-block'; // Mostra o link
+            // Não é necessário esconder a div de export options do top-controls-panel
+            // pois os links agora estão na mensagem de sucesso
+        } else {
+            // Caso haja algum problema e o pedido_id não seja retornado, esconde/desabilita os links
+            exportPdfLink.href = "#";
+            exportExcelLink.href = "#";
+            exportPdfLink.style.display = 'none';
+            exportExcelLink.style.display = 'none';
+        }
+
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+          // Opcional: Esconder os links de exportação após alguns segundos também
+          exportPdfLink.style.display = 'none';
+          exportExcelLink.style.display = 'none';
+        }, 5000);
+      })
+      .catch(err => {
+        alert("Erro ao finalizar venda: " + err.message);
+        console.error("Erro na requisição Fetch:", err);
+      });
+    });
+
+    // Lógica do botão Exportar (no top-controls-panel)
+    exportButton.addEventListener('click', () => {
+      exportOptions.classList.toggle('show');
+    });
+
+    // Esconde as opções de exportar se clicar fora delas
+    document.addEventListener('click', (event) => {
+        if (!exportButton.contains(event.target) && !exportOptions.contains(event.target)) {
+            exportOptions.classList.remove('show');
+        }
+    });
+
+    // Os event listeners para exportPdfLink e exportExcelLink agora só precisam redirecionar
+    // já que o href será setado dinamicamente na resposta de sucesso da venda.
+    // O alerta "Ainda não há um pedido selecionado para exportar!" foi removido.
+    exportPdfLink.addEventListener('click', (e) => {
+        // Nada precisa ser feito aqui, o href já está correto
+        exportOptions.classList.remove('show'); // Esconde as opções do botão "Exportar" do painel superior
+    });
+
+    exportExcelLink.addEventListener('click', (e) => {
+        // Nada precisa ser feito aqui, o href já está correto
+        exportOptions.classList.remove('show'); // Esconde as opções do botão "Exportar" do painel superior
+    });
+
+    // Garante que o foco permaneça no campo do scanner ao carregar a página
+    window.addEventListener('load', () => {
+      scanner.focus();
+      // generatePredictedOrderCode(); // Removed
+    });
+
+  </script>
+</body>
+</html>

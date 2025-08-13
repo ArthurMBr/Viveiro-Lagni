@@ -1,0 +1,106 @@
+{# lotes/templates/lotes/lote_confirm_delete.html #}
+{% extends "lotes/base.html" %} {# <-- MUDE AQUI PARA ESTENDER "lotes/base.html" #}
+
+{% block title %}Confirmar Exclusão de Lote{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <style>
+        /* Reutiliza estilos do form-card */
+        .form-card {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .form-card .card-header {
+            background-color: #dc3545; /* Vermelho para a exclusão */
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 1.5rem 2rem;
+            border-bottom: none;
+        }
+
+        .form-card .card-body {
+            padding: 2rem;
+        }
+
+        .delete-message {
+            font-size: 1.1rem;
+            color: #343a40;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .btn-confirm-delete {
+            background-color: #dc3545; /* Vermelho para confirmar exclusão */
+            border-color: #dc3545;
+            color: white;
+            font-weight: 500;
+            padding: 0.75rem 1.8rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            transition: all 0.2s ease-in-out;
+            margin-right: 1rem;
+        }
+
+        .btn-confirm-delete:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        /* Reutiliza o estilo do botão cancelar do formulário */
+        .btn-form-cancel {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+            font-weight: 500;
+            padding: 0.75rem 1.8rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-form-cancel:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8"> {# Centraliza o card e define largura máxima #}
+            <div class="card form-card">
+                <div class="card-header">
+                    Confirmar Exclusão
+                </div>
+                <div class="card-body">
+                    <p class="delete-message">Você tem certeza que deseja excluir o lote: <br><strong>{{ lote.codigo }} - {{ lote.produto }} ({{ lote.variedade }})</strong>?</p>
+                    <form method="post" class="d-flex justify-content-center"> {# Centraliza os botões #}
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-confirm-delete d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash-fill me-2" viewBox="0 0 16 16">
+                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5"/>
+                            </svg>
+                            Confirmar Exclusão
+                        </button>
+                        <a href="{% url 'lotes:lote_list' %}" class="btn btn-form-cancel d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                            </svg>
+                            Cancelar
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

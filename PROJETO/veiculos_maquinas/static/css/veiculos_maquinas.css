@@ -1,0 +1,241 @@
+/* viveiro_lagni/PROJETO/veiculos_maquinas/static/css/veiculos_maquinas.css */
+
+/* Cores e variáveis base (Paleta Mais Neutra) */
+:root {
+    --primary-color: #6c757d; /* Um cinza médio como cor principal (ex: para cabeçalho da tabela, botões de ação padrão) */
+    --primary-dark: #5a6268; /* Versão mais escura do primary para hover/bordas */
+    --primary-light: #e2e6ea; /* Uma cor mais clara para fundo sutil */
+
+    --secondary-color: #007bff; /* Um azul sutil para botões de ação secundários, se necessário */
+    --success-color: #28a745; /* Mantém o verde padrão para 'Adicionar Novo' / 'Salvar' */
+    --danger-color: #dc3545;  /* Mantém o vermelho padrão para 'Excluir' */
+
+    --background-light: #f8f9fa; /* Fundo geral da área de conteúdo, bem claro */
+    --panel-background: #ffffff; /* Fundo dos cards/painéis, branco puro */
+    --border-color: #dee2e6; /* Cor das bordas, um cinza bem claro */
+    --text-dark: #343a40; /* Cor padrão para textos escuros */
+    --text-muted: #6c757d; /* Cor para textos secundários ou informativos */
+    --box-shadow-light: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.05); /* Sombra mais suave */
+    --border-radius-sm: 0.25rem; /* Bordas arredondadas pequenas */
+    --border-radius-md: 0.5rem;  /* Bordas arredondadas médias */
+}
+
+/* Estilos gerais para containers de lista/tabela */
+.list-container {
+    padding: 30px;
+    background-color: var(--background-light); /* Fundo suave geral */
+    min-height: calc(100vh - 120px); /* Ajuste conforme seu header/footer */
+}
+
+.list-panel {
+    background-color: var(--panel-background);
+    padding: 25px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-light);
+    margin-bottom: 25px;
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.list-header h2 {
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+/* Estilos para tabelas */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    background-color: var(--primary-color); /* Cabeçalho da tabela com o novo cinza */
+    color: white;
+    vertical-align: middle;
+    text-align: center;
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--primary-dark); /* Borda mais escura */
+    font-weight: 500;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: #f2f2f2; /* Um cinza muito claro no hover para linhas */
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+
+.table tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+.table tbody td:not(:first-child) {
+    text-align: center;
+}
+
+
+/* Estilos para botões de ação na tabela */
+.table .btn {
+    margin: 0 5px;
+    padding: 6px 12px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+}
+
+/* Mantendo as cores padrão do Bootstrap para success e danger */
+.table .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-dark);
+}
+
+.table .btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.table .btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+.table .btn-success:hover {
+    background-color: #218838; /* Um pouco mais escuro */
+    border-color: #1e7e34;
+}
+
+.table .btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+.table .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+
+/* Estilos para mensagens de "nenhum item" */
+.no-records {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Estilos para formulários */
+.form-card {
+    background-color: var(--panel-background);
+    padding: 30px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-light);
+    max-width: 700px; /* Limita a largura do formulário para melhor leitura */
+    margin: 30px auto; /* Centraliza o formulário */
+}
+
+.form-card .form-control {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    background-color: #fdfdfd; /* Um fundo bem leve para campos de input */
+}
+
+.form-card .form-control:focus {
+    border-color: var(--primary-color); /* Foco usando a nova cor primária */
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25); /* Sombra do foco mais discreta */
+}
+
+.form-card label {
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-card .btn {
+    margin-right: 10px;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-md);
+}
+
+/* Para a tela de menu (veiculos_maquinas_menu.html) */
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 20px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.menu-button-card {
+    background-color: var(--panel-background);
+    border-radius: 12px;
+    box-shadow: var(--box-shadow-light);
+    padding: 30px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+}
+
+.menu-button-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+}
+
+.menu-button-card .icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-color); /* Ícones com a nova cor primária (cinza) */
+}
+
+.menu-button-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+    color: var(--text-dark);
+}
+
+/* Cores específicas para os ícones no menu, se desejar customizar e sobrescrever a primary-color */
+/* Exemplo com tons mais discretos ou temáticos */
+.menu-button-card.veiculos .icon { color: #6c757d; } /* Cinza neutro */
+.menu-button-card.maquinas .icon { color: #6c757d; } /* Cinza neutro */
+.menu-button-card.ferramentas .icon { color: #6c757d; } /* Cinza neutro */
+
+
+@media (max-width: 768px) {
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+}

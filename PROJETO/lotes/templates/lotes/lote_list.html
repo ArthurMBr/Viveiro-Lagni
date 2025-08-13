@@ -1,0 +1,486 @@
+{# lotes/templates/lotes/lote_list.html #}
+{% extends "lotes/base.html" %}
+
+{% block title %}Lista de Lotes{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <style>
+        /* Variáveis de cor (redundantes se já estiverem em base.html, mas mantidas por segurança) */
+        :root {
+            --primary-color: #6d9f71; /* Verde esmeralda suave */
+            --primary-dark-color: #5b875e; /* Verde mais escuro para hover */
+            --secondary-color: #f0ad4e; /* Amarelo/Laranja para destaque secundário */
+            --secondary-dark-color: #ec971f; /* Amarelo/Laranja mais escuro para hover */
+            --light-bg: #f8fcf8; /* Fundo muito claro, quase branco esverdeado */
+            --card-bg: #ffffff; /* Fundo branco para cards e linhas da tabela */
+            --border-color: #e0e6e0; /* Cor da borda suave esverdeada */
+            --text-color: #3f5e43; /* Verde escuro para o texto padrão */
+            --header-text-color: #ffffff; /* Cor do texto do cabeçalho da tabela */
+            --success-color: #5cb85c; /* Verde para sucesso */
+            --danger-color: #d9534f; /* Vermelho para ações de perigo */
+            --info-color: #5bc0de; /* Azul/Ciano para informações (badges e botões) */
+            --shadow-color-primary: rgba(109, 159, 113, 0.3); /* Sombra para primário */
+            --shadow-color-secondary: rgba(240, 173, 78, 0.3); /* Sombra para secundário */
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        /* Ajuste do padding do page-header para mobile */
+        @media (max-width: 767.98px) {
+            .page-header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+            }
+        }
+
+
+        h1 {
+            color: var(--text-color);
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        /* Ajuste do tamanho da fonte do h1 para mobile */
+        @media (max-width: 575.98px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+
+
+        /* Estilos para o formulário de pesquisa e botão adicionar */
+        .search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 0.7rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            flex-wrap: wrap; /* Garante que os itens quebrem a linha */
+            gap: 15px;
+        }
+        /* Ajustes para o search-container em telas menores */
+        @media (max-width: 767.98px) {
+            .search-container {
+                flex-direction: column; /* Empilha os itens verticalmente */
+                align-items: stretch; /* Estica os itens para preencher a largura */
+                padding: 1rem;
+                margin-bottom: 20px;
+            }
+        }
+
+        .search-container .form-inline {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+            justify-content: flex-end; /* Alinha os botões à direita por padrão */
+            min-width: 280px;
+        }
+        /* Ajustes do form-inline em telas menores */
+        @media (max-width: 767.98px) {
+            .search-container .form-inline {
+                width: 100%;
+                justify-content: center; /* Centraliza os itens do formulário */
+                flex-wrap: wrap; /* Permite que input e botões quebrem a linha */
+                gap: 8px;
+            }
+            .search-container input[type="text"] {
+                flex-grow: 1; /* Permite que o input ocupe o espaço disponível */
+                min-width: unset; /* Remove o min-width para maior flexibilidade */
+                max-width: unset; /* Remove o max-width */
+            }
+            .search-container .btn {
+                flex-grow: 1; /* Faz os botões ocuparem a largura disponível */
+            }
+        }
+
+        .search-container input[type="text"] {
+            border-radius: .5rem;
+            border: 1px solid var(--border-color);
+            padding: .6rem 1rem;
+            flex-grow: 0.3;
+            min-width: 180px;
+            max-width: 350px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+            font-size: 0.95rem;
+        }
+        .search-container input[type="text"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem var(--shadow-color-primary);
+        }
+
+        /* Botões de Ação (Gerais e de Pesquisa) */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--header-text-color);
+            padding: .6rem 1.2rem;
+            border-radius: .5rem;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark-color);
+            border-color: var(--primary-dark-color);
+            color: var(--header-text-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px var(--shadow-color-primary);
+        }
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--header-text-color);
+            padding: .6rem 1.2rem;
+            border-radius: .5rem;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark-color);
+            border-color: var(--secondary-dark-color);
+            color: var(--header-text-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px var(--shadow-color-secondary);
+        }
+
+        .btn-add-lote {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--header-text-color);
+            font-weight: 600;
+            padding: 0.7rem 1.8rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 5px 15px var(--shadow-color-primary);
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-add-lote:hover {
+            background-color: var(--primary-dark-color);
+            border-color: var(--primary-dark-color);
+            color: var(--header-text-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--shadow-color-primary);
+        }
+        .btn-add-lote svg {
+            width: 18px;
+            height: 18px;
+        }
+        /* Ajuste do botão Adicionar para mobile */
+        @media (max-width: 767.98px) {
+            .btn-add-lote {
+                width: 100%; /* Ocupa a largura total */
+                justify-content: center; /* Centraliza o texto e ícone */
+                padding: 0.6rem 1.5rem; /* Reduz padding */
+                font-size: 0.95rem; /* Reduz fonte */
+            }
+        }
+
+
+        /* Tabela de Lotes */
+        .table-lotes {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.8rem;
+            /* Em telas pequenas, a tabela será rolada horizontalmente devido a .table-responsive */
+        }
+
+        .table-lotes thead th {
+            background-color: var(--primary-color);
+            color: var(--header-text-color);
+            padding: 1.3rem 1.5rem;
+            text-align: left;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        /* Ajuste do padding da thead para mobile */
+        @media (max-width: 767.98px) {
+            .table-lotes thead th {
+                padding: 1rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        .table-lotes thead tr th:first-child {
+            border-top-left-radius: 0.8rem;
+            border-bottom-left-radius: 0.8rem;
+        }
+        .table-lotes thead tr th:last-child {
+            border-top-right-radius: 0.8rem;
+            border-bottom-right-radius: 0.8rem;
+        }
+
+
+        .table-lotes tbody tr {
+            background-color: var(--card-bg);
+            border-radius: 0.8rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 0.8rem;
+        }
+
+        .table-lotes tbody tr:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+        }
+
+        .table-lotes tbody td {
+            padding: 1.2rem 1.5rem;
+            vertical-align: middle;
+            border-top: none;
+            border-bottom: none;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            border-left: 1px solid transparent;
+            border-right: 1px solid transparent;
+        }
+        /* Ajuste do padding e fonte da td para mobile */
+        @media (max-width: 767.98px) {
+            .table-lotes tbody td {
+                padding: 0.8rem 0.6rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        .table-lotes tbody tr:hover td {
+             border-color: rgba(109, 159, 113, 0.2);
+        }
+
+        .table-lotes tbody tr td:first-child {
+            border-top-left-radius: 0.8rem;
+            border-bottom-left-radius: 0.8rem;
+        }
+        .table-lotes tbody tr td:last-child {
+            border-top-right-radius: 0.8rem;
+            border-bottom-right-radius: 0.8rem;
+        }
+
+        /* Estilos dos botões de ação na tabela */
+        .btn-group-actions {
+            display: flex; /* Transforma em flex para alinhar os botões */
+            gap: 0.4rem; /* Espaçamento menor entre os botões */
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+            justify-content: center; /* Centraliza os botões em telas pequenas */
+        }
+        .btn-group-actions .btn {
+            border-radius: 0.5rem;
+            /* margin-right: 0.6rem; REMOVIDO, usando gap agora */
+            padding: 0.6rem 1.1rem;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-grow: 1; /* Faz os botões crescerem para preencher o espaço */
+            max-width: 100px; /* Limita o tamanho máximo em flex-grow */
+        }
+        .btn-group-actions .btn svg {
+            margin-right: 0px; /* Garante que o ícone não tenha margem extra */
+            width: 15px;
+            height: 15px;
+        }
+        /* Ajuste dos botões de ação para mobile */
+        @media (max-width: 767.98px) {
+            .btn-group-actions .btn {
+                padding: 0.5rem 0.8rem; /* Reduz padding */
+                font-size: 0.8rem; /* Reduz fonte */
+                width: 100%; /* Força os botões a ocuparem a largura total */
+                max-width: unset; /* Remove o max-width em mobile */
+            }
+            .table-lotes tbody td:last-child { /* Ações */
+                text-align: center; /* Centraliza a coluna de ações em mobile */
+            }
+        }
+
+
+        /* Cores dos botões customizadas */
+        .btn-outline-info {
+            color: var(--info-color);
+            border-color: var(--info-color);
+            background-color: transparent;
+        }
+        .btn-outline-info:hover {
+            background-color: var(--info-color);
+            color: white;
+            border-color: var(--info-color);
+            box-shadow: 0 4px 8px rgba(91, 192, 222, 0.2);
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+            background-color: transparent;
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+            box-shadow: 0 4px 8px rgba(217, 83, 79, 0.2);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 8px var(--shadow-color-primary);
+        }
+
+        /* Badge para quantidade */
+        .badge-info {
+            background-color: var(--info-color);
+            color: white;
+            font-weight: 600;
+            padding: 0.5em 0.8em;
+            border-radius: 0.4rem;
+            font-size: 0.85em;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(91, 192, 222, 0.2);
+        }
+
+        /* Alerta de nenhum lote */
+        .alert-info {
+            background-color: #eaf8e9;
+            color: var(--text-color);
+            border-color: #d4edda;
+            border-radius: 1rem;
+            box-shadow: 0 6px 18px rgba(109, 159, 113, 0.1);
+            padding: 2.5rem;
+        }
+        .alert-info .alert-heading {
+            color: var(--primary-dark-color);
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 575.98px) {
+            .alert-info .alert-heading {
+                font-size: 1.5rem;
+            }
+        }
+        .alert-info p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 575.98px) {
+            .alert-info p {
+                font-size: 1rem;
+            }
+        }
+        .alert-info hr {
+            border-top: 1px solid #c8e6c9;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .alert-info .btn-add-lote {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            padding: 0.8rem 2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-xl px-3 px-md-4"> {# Adiciona um container Bootstrap aqui com padding responsivo #}
+        <div class="page-header">
+            <h1 class="mb-0">Lista de Lotes</h1>
+        </div>
+
+        <div class="search-container">
+            <form method="GET" action="{% url 'lotes:lote_list' %}" class="form-inline">
+                <input type="text" name="q" placeholder="Pesquisar lotes..." class="form-control" value="{{ query|default:'' }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+                {% if query %}
+                    <a href="{% url 'lotes:lote_list' %}" class="btn btn-secondary">Limpar</a>
+                {% endif %}
+            </form>
+            <a href="{% url 'lotes:lote_create' %}" class="btn btn-add-lote">
+                <i class="bi bi-plus-circle"></i>
+                Adicionar Novo Lote
+            </a>
+        </div>
+
+        <div class="table-responsive"> {# IMPORTANTE: Torna a tabela rolável horizontalmente em telas pequenas #}
+            {% if lotes %}
+                <table class="table table-lotes">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Produto</th>
+                            {# <th>Variedade Lote</th> #} {# Removido para economizar espaço em mobile #}
+                            <th>Quantidade</th>
+                            <th>Preço Unitário</th>
+                            <th>Data Semeadura</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lote in lotes %}
+                        <tr>
+                            <td>{{ lote.codigo }}</td>
+                            <td>{{ lote.produto }}</td>
+                            {# <td>{{ lote.variedade }}</td> #} {# Removido para economizar espaço em mobile #}
+                            <td><span class="badge badge-info">{{ lote.quantidade }}</span></td>
+                            <td>R$ {{ lote.preco_unitario|floatformat:2 }}</td>
+                            <td>{{ lote.data_semeadura|date:"d/m/Y" }}</td>
+                            <td class="text-center">
+                                <div class="btn-group-actions">
+                                    <a href="{% url 'lotes:lote_update' lote.pk %}" class="btn btn-outline-info btn-sm" title="Editar Lote">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'lotes:lote_delete' lote.pk %}" class="btn btn-outline-danger btn-sm" title="Excluir Lote">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                    <a href="{% url 'lotes:gerar_etiqueta_lote' lote.pk %}" class="btn btn-outline-primary btn-sm" title="Gerar Etiqueta">
+                                        <i class="bi bi-tag-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info text-center py-4" role="alert">
+                    <h4 class="alert-heading">Nenhum lote encontrado!</h4>
+                    <p>Parece que você ainda não tem lotes cadastrados no sistema.</p>
+                    <hr>
+                    <p class="mb-0">Comece adicionando seu primeiro lote agora mesmo.</p>
+                    <a href="{% url 'lotes:lote_create' %}" class="btn btn-add-lote mt-3">
+                        <i class="bi bi-plus-circle"></i>
+                        Adicionar Novo Lote
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div> {# Fechamento do container Bootstrap #}
+{% endblock %}

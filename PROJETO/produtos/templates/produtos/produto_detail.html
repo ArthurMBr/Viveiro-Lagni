@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %} {# Para formatação de números, se necessário #}
+
+{% block title %}Detalhes do Produto{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Variáveis CSS (replicadas para consistência) */
+    :root {
+        --primary-color: #79a37c; /* Um verde-azulado mais suave e pastel */
+        --secondary-color: #aebdc4; /* Um cinza-azulado suave */
+        --accent-color: #f7b731; /* Um amarelo mostarda suave para destaque */
+        --text-dark: #34495e; /* Azul escuro quase preto para textos principais */
+        --text-light: #6c7a89; /* Cinza suave para textos secundários */
+        --background-light: #fdfdfd; /* Branco quase off-white para fundos claros */
+        --border-color: #e0e6ed; /* Borda bem suave */
+        --box-shadow-light: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra mais suave */
+        --border-radius-lg: 12px; /* Arredondamento maior para cards e elementos principais */
+        --border-radius-md: 8px; /* Arredondamento médio para botões e inputs */
+        --border-radius-sm: 5px; /* Arredondamento menor para itens internos */
+    }
+
+    body {
+        background-color: #f8f9fa; /* Fundo claro */
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        color: var(--text-dark);
+    }
+
+    .detail-container {
+        padding: 20px 25px;
+    }
+
+    .page-header {
+        background-color: var(--background-light);
+        padding: 25px 30px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-light);
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .page-header h1 {
+        font-size: 2.2rem;
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-icon {
+        color: var(--primary-color);
+        margin-right: 15px;
+        font-size: 2.8rem;
+    }
+
+    /* Estilos para o card de detalhes do produto */
+    .product-detail-card {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-light);
+        background-color: var(--background-light);
+        margin-bottom: 2rem;
+    }
+
+    .product-detail-card .card-header {
+        background-color: #f2f5f7;
+        border-bottom: 1px solid var(--border-color);
+        padding: 18px 25px;
+        font-weight: 500;
+        color: var(--text-dark);
+        border-top-left-radius: var(--border-radius-lg);
+        border-top-right-radius: var(--border-radius-lg);
+        font-size: 1.15rem;
+    }
+
+    .product-detail-card .card-body {
+        padding: 30px;
+    }
+
+    .product-detail-item {
+        display: flex;
+        align-items: center; /* Alinha o ícone e o texto verticalmente */
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed var(--border-color); /* Linha tracejada suave */
+    }
+
+    .product-detail-item:last-child {
+        border-bottom: none; /* Remove a borda do último item */
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .product-detail-item strong {
+        color: var(--text-dark);
+        font-weight: 600;
+        min-width: 150px; /* Garante alinhamento dos dois pontos */
+        display: inline-block; /* Para que min-width funcione */
+    }
+
+    .product-detail-item span {
+        color: var(--text-light);
+        flex-grow: 1; /* Permite que o span ocupe o restante do espaço */
+    }
+
+    .product-detail-icon {
+        color: var(--primary-color); /* Cor dos ícones de detalhe */
+        font-size: 1.2rem;
+        margin-right: 10px;
+        width: 30px; /* Garante que todos os ícones tenham a mesma largura para alinhamento */
+        text-align: center;
+    }
+
+    .product-image-large {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        object-fit: contain; /* Ajusta a imagem dentro da moldura, sem cortar */
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--box-shadow-light);
+        margin-bottom: 25px;
+    }
+
+    .btn-action-group {
+        display: flex;
+        flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+        gap: 10px; /* Espaçamento entre os botões */
+        margin-top: 30px;
+        justify-content: center; /* Centraliza os botões */
+    }
+
+    .btn-action-group .btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-action-group .btn i {
+        margin-right: 8px;
+    }
+
+    /* Cores dos botões customizadas para consistência */
+    .btn-edit-custom {
+        background-color: #28a745; /* Verde Bootstrap */
+        border-color: #28a745;
+        color: white;
+    }
+    .btn-edit-custom:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    }
+
+    .btn-delete-custom {
+        background-color: #dc3545; /* Vermelho Bootstrap */
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-delete-custom:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+    }
+
+    .btn-back-custom {
+        background-color: var(--secondary-color); /* Cinza suave */
+        border-color: var(--secondary-color);
+        color: white;
+    }
+    .btn-back-custom:hover {
+        background-color: #9aa8b0;
+        border-color: #8c98a0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(174, 189, 196, 0.2);
+    }
+
+    /* Badges de status */
+    .badge-status {
+        font-size: 0.9em;
+        padding: 0.5em 0.7em;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid detail-container mt-4">
+
+    <div class="page-header">
+        <h1 class="mb-3 mb-md-0"><i class="fas fa-info-circle header-icon"></i> Detalhes do Produto</h1>
+        <div class="btn-group" role="group" aria-label="Ações do Produto">
+            <a href="{% url 'produtos:update' object.pk %}" class="btn btn-edit-custom">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'produtos:delete' object.pk %}" class="btn btn-delete-custom">
+                <i class="fas fa-trash-alt"></i> Excluir
+            </a>
+            <a href="{% url 'produtos:list' %}" class="btn btn-back-custom">
+                <i class="fas fa-arrow-left"></i> Voltar para a Lista
+            </a>
+        </div>
+    </div>
+
+    <div class="card product-detail-card">
+        <div class="card-header">
+            Detalhes do Produto: <span class="fw-bold">{{ object.variedade }} (Cód: {{ object.cod }})</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4 d-flex justify-content-center align-items-start mb-4 mb-lg-0">
+                    {% if object.imagem %}
+                        <img src="{{ object.imagem.url }}" alt="{{ object.variedade }}" class="img-fluid product-image-large">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="Sem Imagem" class="img-fluid product-image-large">
+                    {% endif %}
+                </div>
+                <div class="col-lg-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-tag"></i>
+                                <strong>Código:</strong> <span>{{ object.cod }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-palette"></i>
+                                <strong>Tipo:</strong> <span>{{ object.get_tipo_display }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-leaf"></i>
+                                <strong>Variedade:</strong> <span>{{ object.variedade }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-seedling"></i>
+                                <strong>Espécie:</strong> <span>{{ object.especie }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-barcode"></i>
+                                <strong>Cód. Espécie:</strong> <span>{{ object.cod_especie|default:"Não informado" }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-boxes"></i>
+                                <strong>Estoque:</strong> <span>{{ object.estoque }} {{ object.get_unidade_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-money-bill-wave"></i>
+                                <strong>Preço (R$):</strong> <span>{{ object.preco|floatformat:2|intcomma }}</span>
+                            </div>
+                             <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-balance-scale"></i>
+                                <strong>Qtd. por Unid.:</strong> <span>{{ object.get_qtd_unid_display|default:"Não se aplica" }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-clipboard-check"></i>
+                                <strong>Status:</strong>
+                                <span>
+                                    <span class="badge badge-status bg-{% if object.status == 'Com Estoque' %}success{% elif object.status == 'Sem Estoque' %}danger{% else %}warning{% endif %}">
+                                        {{ object.status }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-calendar-alt"></i>
+                                <strong>Data Cadastro:</strong> <span>{{ object.data_cadastro|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-id-card"></i>
+                                <strong>NCM:</strong> <span>{{ object.ncm.codigo }} - {{ object.ncm.descricao|default:"Não informado" }}</span>
+                            </div>
+                            <div class="product-detail-item">
+                                <i class="product-detail-icon fas fa-file-invoice-dollar"></i>
+                                <strong>CFOP:</strong> <span>{{ object.cfop.codigo }} - {{ object.cfop.descricao|default:"Não informado" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-detail-item" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;"> {# O último item da lista geralmente não tem borda inferior #}
+                        <i class="product-detail-icon fas fa-info-circle"></i>
+                        <strong>Info. Cultivar:</strong> <span>{{ object.cultivar_info|default:"Não informado" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

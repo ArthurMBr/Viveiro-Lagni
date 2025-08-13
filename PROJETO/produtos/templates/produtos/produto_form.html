@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}
+    {% if produto %}
+        Editar Produto: {{ produto.variedade|default:produto.cod }}
+    {% else %}
+        Cadastrar Novo Produto
+    {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    {# Usando arquivo CSS do Select2 LOCALMENTE - Verifique o caminho! #}
+    <link href="{% static 'select2/4.1.0/css/select2.min.css' %}" rel="stylesheet" />
+    <style>
+        /* Seus estilos personalizados para o formulário - mantidos */
+        .form-card {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .form-card .card-header {
+            background-color: #28a745;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 1.5rem 2rem;
+            border-bottom: none;
+        }
+
+        .form-card .card-body {
+            padding: 2rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 0.5rem;
+            border: 1px solid #ced4da;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .btn-success-custom {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-success-custom:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-outline-secondary-custom {
+            color: #6c757d;
+            border-color: #6c757d;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-secondary-custom:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .select2-container .select2-selection--single {
+            height: calc(2.25rem + 2px); /* Altura padrão de inputs do Bootstrap */
+            border-radius: 0.5rem;
+            border: 1px solid #ced4da;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5; /* Ajuste para alinhar verticalmente */
+            padding-left: 0.75rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(2.25rem + 2px);
+            top: 0;
+            right: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        /* Estilo para erro de validação (Bootstrap) */
+        .was-validated .form-control:invalid,
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 80%;
+            color: #dc3545;
+        }
+        .errorlist {
+            color: #dc3545;
+            list-style: none;
+            padding-left: 0;
+            margin-top: 0.25rem;
+            font-size: 80%;
+        }
+        .errorlist li {
+            margin-bottom: 0.2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="card form-card shadow-lg mx-auto" style="max-width: 900px;">
+        <div class="card-header text-center">
+            {% if produto %}
+                Editar Produto
+            {% else %}
+                Cadastrar Novo Produto
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {# Mensagens de erro globais do formulário (não associadas a campos específicos) #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                {# Primeira linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.cod.id_for_label }}">{{ form.cod.label }}</label>
+                            {% render_field form.cod class="form-control" %}
+                            {% for error in form.cod.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.unidade.id_for_label }}">{{ form.unidade.label }}</label>
+                            {% render_field form.unidade class="form-control select2-basic" %}
+                            {% for error in form.unidade.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Segunda linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.qtd_unid.id_for_label }}">{{ form.qtd_unid.label }}</label>
+                            {% render_field form.qtd_unid class="form-control select2-basic" %}
+                            {% for error in form.qtd_unid.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                            {% render_field form.tipo class="form-control select2-basic" %}
+                            {% for error in form.tipo.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Terceira linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.variedade.id_for_label }}">{{ form.variedade.label }}</label>
+                            {% render_field form.variedade class="form-control" %}
+                            {% for error in form.variedade.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.especie.id_for_label }}">{{ form.especie.label }}</label>
+                            {% render_field form.especie class="form-control" %}
+                            {% for error in form.especie.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Quarta linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.cod_especie.id_for_label }}">{{ form.cod_especie.label }}</label>
+                            {% render_field form.cod_especie class="form-control" %}
+                            {% for error in form.cod_especie.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {# CAMPO CULTIVAR_INFO AJUSTADO AQUI #}
+                    <div class="col-md-6"> <div class="form-group">
+                            <label for="{{ form.cultivar_info.id_for_label }}">Cultivar</label> {# Rótulo ajustado aqui no HTML também, por clareza #}
+                            {% render_field form.cultivar_info class="form-control" %}
+                            {% for error in form.cultivar_info.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Quinta linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.estoque.id_for_label }}">{{ form.estoque.label }}</label>
+                            {% render_field form.estoque class="form-control" %}
+                            {% for error in form.estoque.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.preco.id_for_label }}">{{ form.preco.label }}</label>
+                            {% render_field form.preco class="form-control" %}
+                            {% for error in form.preco.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Sexta linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+                            {% render_field form.status class="form-control select2-basic" %}
+                            {% for error in form.status.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.ncm.id_for_label }}">{{ form.ncm.label }}</label>
+                            {% render_field form.ncm class="form-control select2-basic" data-placeholder="Buscar NCM..." %}
+                            {% for error in form.ncm.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Sétima linha de campos #}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.cfop.id_for_label }}">{{ form.cfop.label }}</label>
+                            {% render_field form.cfop class="form-control select2-basic" data-placeholder="Buscar CFOP..." %}
+                            {% for error in form.cfop.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.imagem.id_for_label }}">{{ form.imagem.label }}</label>
+                            {% render_field form.imagem class="form-control-file" %}
+                            {% if produto.imagem %}
+                                <div class="mt-2">
+                                    <p>Imagem atual:</p>
+                                    <img src="{{ produto.imagem.url }}" alt="Imagem do Produto" style="max-width: 200px; height: auto;">
+                                </div>
+                            {% endif %}
+                            {% for error in form.imagem.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'produtos:list' %}" class="btn btn-outline-secondary-custom mr-2">Cancelar</a>
+                    <button type="submit" class="btn btn-success-custom">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    {# Usando arquivo JS do Select2 LOCALMENTE - Verifique o caminho! #}
+    <script src="{% static 'select2/4.1.0/js/select2.min.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicialização do Select2 para os campos de seleção
+            $('#id_tipo').select2({
+                placeholder: 'Selecione o Tipo de Produto',
+                allowClear: true
+            });
+
+            $('#id_unidade').select2({
+                placeholder: 'Selecione a Unidade',
+                allowClear: true
+            });
+
+            $('#id_qtd_unid').select2({
+                placeholder: 'Selecione a Quantidade por Unidade',
+                allowClear: true
+            });
+
+            $('#id_status').select2({
+                placeholder: 'Selecione o Status',
+                allowClear: false
+            });
+
+            // Configuração para Select2 com busca remota (NCM)
+            $('#id_ncm').select2({
+                minimumInputLength: 2, // Mínimo de caracteres para começar a buscar
+                ajax: {
+                    url: "{% url 'produtos:ncm_search_api' %}", // URL da sua view de API
+                    dataType: 'json',
+                    delay: 250, // Atraso em milissegundos antes de iniciar a busca
+                    data: function (params) {
+                        return {
+                            q: params.term, // Termo de busca
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 10) < data.count // Assumindo 10 resultados por página na API
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar NCM por código ou descrição...',
+                allowClear: true
+            });
+
+            // Configuração para Select2 com busca remota (CFOP)
+            $('#id_cfop').select2({
+                minimumInputLength: 2, // Mínimo de caracteres para começar a buscar
+                ajax: {
+                    url: "{% url 'produtos:cfop_search_api' %}", // URL da sua view de API
+                    dataType: 'json',
+                    delay: 250, // Atraso em milissegundos antes de iniciar a busca
+                    data: function (params) {
+                        return {
+                            q: params.term, // Termo de busca
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: (params.page * 10) < data.count // Assumindo 10 resultados por página na API
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Buscar CFOP por código ou descrição...',
+                allowClear: true
+            });
+
+
+            // Javascript para validação de formulário do Bootstrap
+            (function() {
+              'use strict';
+              window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                if (forms && forms.length > 0) {
+                    Array.prototype.filter.call(forms, function(form) {
+                      form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                          event.preventDefault();
+                          event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                      }, false);
+                    });
+                }
+              }, false);
+            })();
+        });
+    </script>
+{% endblock %}

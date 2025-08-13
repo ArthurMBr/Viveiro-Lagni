@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Pagamento do Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Pagamento do Pedido #{{ pedido.id }}</h2>
+                <div class="order-summary mb-4">
+                    <p><strong>Total do Pedido:</strong> <span class="text-success">R$ {{ pedido.total_pedido|intcomma }}</span></p>
+                </div>
+
+                <form method="post" action="{% url 'catalogo:realizar_pagamento' pedido.id %}" id="payment-form">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label d-block">Quando deseja pagar?</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tipo_pagamento" id="pagar_agora" value="agora" required>
+                            <label class="form-check-label" for="pagar_agora">Pagar agora</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tipo_pagamento" id="pagar_mais_tarde" value="mais_tarde" checked>
+                            <label class="form-check-label" for="pagar_mais_tarde">Pagar mais tarde</label>
+                        </div>
+                    </div>
+
+                    <div id="payment-methods" style="display:none;">
+                        <label class="form-label d-block">Escolha o método de pagamento</label>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pagamento" id="metodo_pix" value="pix">
+                                <label class="form-check-label" for="metodo_pix">
+                                    <i class="fas fa-qrcode me-2"></i> Pix
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pagamento" id="metodo_boleto" value="boleto">
+                                <label class="form-check-label" for="metodo_boleto">
+                                    <i class="fas fa-barcode me-2"></i> Boleto
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pagamento" id="metodo_cartao" value="cartao">
+                                <label class="form-check-label" for="metodo_cartao">
+                                    <i class="fas fa-credit-card me-2"></i> Cartão de Crédito
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pagarAgoraRadio = document.getElementById('pagar_agora');
+        const paymentMethodsDiv = document.getElementById('payment-methods');
+        const paymentForm = document.getElementById('payment-form');
+
+        pagarAgoraRadio.addEventListener('change', function() {
+            if (this.checked) {
+                paymentMethodsDiv.style.display = 'block';
+                // Define o atributo required para os botões de rádio
+                document.querySelectorAll('input[name="metodo_pagamento"]').forEach(radio => radio.required = true);
+            } else {
+                paymentMethodsDiv.style.display = 'none';
+                // Remove o atributo required
+                document.querySelectorAll('input[name="metodo_pagamento"]').forEach(radio => radio.required = false);
+            }
+        });
+
+        // Limpa o required se o pagamento for para mais tarde
+        document.getElementById('pagar_mais_tarde').addEventListener('change', function() {
+            if (this.checked) {
+                document.querySelectorAll('input[name="metodo_pagamento"]').forEach(radio => radio.required = false);
+            }
+        });
+    });
+</script>
+{% endblock %}

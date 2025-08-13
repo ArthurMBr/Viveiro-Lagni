@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ page_title }}</h2>
+    <div class="alert alert-danger" role="alert">
+        Tem certeza que deseja excluir o veículo "{{ veiculo.nome }}"?
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+        <a href="{% url 'veiculos_maquinas:veiculo_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

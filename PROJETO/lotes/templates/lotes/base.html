@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestão de Lotes{% endblock %}</title>
+    {# Inclua o Bootstrap CSS aqui #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    {# Inclua Bootstrap Icons (se estiver usando) #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    {# Estilos globais ou variáveis de cor #}
+    <style>
+        :root {
+            --primary-color: #6d9f71; /* Verde esmeralda suave */
+            --primary-dark-color: #5b875e; /* Verde mais escuro para hover */
+            --secondary-color: #f0ad4e; /* Amarelo/Laranja para destaque secundário */
+            --secondary-dark-color: #ec971f; /* Amarelo/Laranja mais escuro para hover */
+            --light-bg: #f8fcf8; /* Fundo muito claro, quase branco esverdeado */
+            --card-bg: #ffffff; /* Fundo branco para cards e linhas da tabela */
+            --border-color: #e0e6e0; /* Cor da borda suave esverdeada */
+            --text-color: #3f5e43; /* Verde escuro para o texto padrão */
+            --header-text-color: #ffffff; /* Cor do texto do cabeçalho da tabela */
+            --success-color: #5cb85c; /* Verde para sucesso */
+            --danger-color: #d9534f; /* Vermelho para ações de perigo */
+            --info-color: #5bc0de; /* Azul/Ciano para informações (badges e botões) */
+            --shadow-color-primary: rgba(109, 159, 113, 0.3); /* Sombra para primário */
+            --shadow-color-secondary: rgba(240, 173, 78, 0.3); /* Sombra para secundário */
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light-bg); /* Aplica a cor de fundo definida */
+            color: var(--text-color);
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Estilos para a nova faixa superior */
+        .app-header {
+            background-color: var(--primary-color); /* Verde esmeralda */
+            color: var(--header-text-color); /* Texto branco */
+            padding: 1rem 0; /* Padding lateral será tratado pelo container interno */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil para profundidade */
+        }
+        /* Ajuste do padding do header para telas menores */
+        @media (max-width: 767.98px) { /* Para telas extra pequenas (xs) e pequenas (sm) */
+            .app-header .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        .app-header .app-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--header-text-color);
+            text-decoration: none; /* Remover sublinhado do link */
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Espaço entre o ícone e o texto do título */
+        }
+        /* Ajuste do tamanho da fonte do título para telas menores */
+        @media (max-width: 575.98px) { /* Para telas extra pequenas (xs) */
+            .app-header .app-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        .app-header .app-title svg {
+            width: 30px;
+            height: 30px;
+            fill: var(--header-text-color); /* Garante que o ícone tenha a cor correta */
+        }
+        @media (max-width: 575.98px) {
+            .app-header .app-title svg {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        .app-header .navbar-nav .nav-link {
+            color: var(--header-text-color);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .app-header .navbar-nav .nav-link:hover,
+        .app-header .navbar-nav .nav-link.active {
+            background-color: var(--primary-dark-color); /* Verde mais escuro no hover/ativo */
+            color: var(--header-text-color);
+        }
+
+        /* Ajustes para a navegação colapsada em telas pequenas */
+        .app-header .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .app-header .navbar-toggler-icon {
+            filter: brightness(0) invert(1); /* Torna o ícone do hambúrguer branco */
+        }
+        .app-header .navbar-collapse {
+            margin-top: 1rem; /* Espaço entre o título e o menu colapsado */
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 0.5rem;
+        }
+        .app-header .navbar-nav {
+            width: 100%; /* Faz os links ocuparem a largura total no menu colapsado */
+        }
+        .app-header .navbar-nav .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        .app-header .navbar-nav .nav-link {
+            text-align: center; /* Centraliza os links no menu colapsado */
+        }
+
+
+        .main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 2.5rem 0; /* Apenas padding vertical. Horizontal será do container */ 
+        }
+        /* Ajuste do padding vertical do main-content para telas menores */
+        @media (max-width: 767.98px) {
+            .main-content {
+                padding: 1.5rem 0; /* Reduz o padding vertical */
+            }
+        }
+
+        .app-footer {
+            background-color: var(--primary-dark-color); /* Usar o verde escuro para o rodapé */
+            color: var(--header-text-color);
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.9rem;
+            margin-top: auto; /* Empurra o rodapé para baixo */
+        }
+        /* Ajuste do padding do footer para telas menores */
+        @media (max-width: 767.98px) {
+            .app-footer .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Utilitários Bootstrap para ajustar o espaçamento dos ícones nos botões */
+        .btn svg {
+            vertical-align: middle;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="app-header">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap">
+            <a href="{% url 'lotes:lote_list' %}" class="app-title">
+                <i class="bi bi-box-seam-fill"></i> {# Usando Bootstrap Icon #}
+                Gestão de Lotes
+            </a>
+            <nav class="navbar navbar-expand-lg"> {# Usamos navbar-expand-lg para colapsar em telas menores que 'large' #}
+                <div class="container-fluid"> {# container-fluid aqui dentro do navbar para controle do toggler #}
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto"> {# ms-auto para alinhar à direita em telas grandes #}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'lote_list' %}active{% endif %}" aria-current="page" href="{% url 'lotes:lote_list' %}">Ver Lotes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'lote_create' %}active{% endif %}" href="{% url 'lotes:lote_create' %}">Adicionar Lote</a>
+                            </li>
+                            {# Adicione outros links de navegação aqui, se houver #}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {# O container será adicionado dentro do bloco content em cada template #}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="container"> {# Adiciona container ao rodapé também #}
+            © {% now "Y" %} Sistema de Lotes. Todos os direitos reservados.
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-secondary btn-sm mt-2">Página Inicial</a>
+    </footer>
+
+    {# Inclua o Bootstrap JS e Popper.js aqui #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% block extra_body %}{% endblock %}
+</body>
+</html>

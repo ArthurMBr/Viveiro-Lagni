@@ -1,0 +1,41 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+  {# 1) Painel de Scanner #}
+  <div class="module" style="margin-bottom: 1.5em; padding: 1em; background: #fff;">
+    <h2>📷 Scanner de Etiquetas</h2>
+    <input 
+      type="text" 
+      id="barcode-input" 
+      placeholder="Bipe aqui e pressione Enter" 
+      autofocus
+      style="font-size:1.1em; padding:0.5em; width:100%; max-width:400px;"
+    >
+    <ul id="scan-history" style="margin-top:1em; list-style:none; padding:0;">
+      <!-- aqui vão aparecendo os códigos -->
+    </ul>
+  </div>
+
+  {# 2) o resto da listagem padrão do admin #}
+  {{ block.super }}
+
+  {# 3) Script simples para empilhar as leituras #}
+  <script>
+    (function() {
+      const input   = document.getElementById('barcode-input');
+      const history = document.getElementById('scan-history');
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const code = this.value.trim();
+          if (!code) return;
+          const li = document.createElement('li');
+          li.textContent = code;
+          li.style.padding = '0.2em 0';
+          history.appendChild(li);
+          this.value = '';
+        }
+      });
+    })();
+  </script>
+{% endblock %}

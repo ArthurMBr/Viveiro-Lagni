@@ -1,0 +1,105 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {# Carrega CSS do jQuery UI #}
+  <link
+    rel="stylesheet"
+    href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css"
+  />
+{% endblock %}
+
+{% block content %}
+  <div id="pdv-tabs" style="margin-bottom:1em;">
+    <ul>
+      <li><a href="#tab-items">{% trans "Itens do Pedido" %}</a></li>
+      <li><a href="#tab-scanner">{% trans "Scanner de Etiquetas" %}</a></li>
+    </ul>
+
+    <div id="tab-items">
+      {{ block.super }}  {# aqui fica o formulário de Itens do Pedido #}
+    </div>
+
+    <div id="tab-scanner">
+      <div class="module" style="padding:1em;">
+        <h2 class="module-title">{% trans "Scanner de Etiquetas" %}</h2>
+        <input
+          id="scanner"
+          type="text"
+          placeholder="{% trans 'Bipe aqui e tecle Enter' %}"
+          autofocus
+          style="width:100%; padding:.5em; box-sizing:border-box;"
+        >
+        <ul id="scan-history" style="list-style:none; padding:0; margin-top:.5em;"></ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}  {# script de abas + scanner #}
+  {{ block.super }}
+  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    (function($) {
+      $(function() {
+        // Inicializa as abas
+        $("#pdv-tabs").tabs();
+      });
+
+      // Dados injetados pela changeform_view
+      const loteDetails = JSON.parse('{{ lote_details_json|escapejs }}');
+
+      function formatBR(n) {
+        return Number(n).toFixed(2).replace('.', ',');
+      }
+
+      function updateGrand() {
+        let total = 0;
+        $('#cart tbody tr').each(function() {
+          total += Number(this.dataset.total);
+        });
+        $('#grand').text(formatBR(total));
+      }
+
+      function addOrIncrement(code) {
+        const d = loteDetails[code];
+        if (!d) {
+          alert("Lote não encontrado: " + code);
+          return;
+        }
+        let row = $(`#cart tbody tr[data-pk="${d.pk}"]`);
+        if (row.length) {
+          const qd = row.find('.qty');
+          let q = Number(qd.text()) + 1;
+          qd.text(q);
+          const tot = q * d.preco_unitario;
+          row.find('.tot').text(formatBR(tot));
+          row[0].dataset.total = tot;
+        } else {
+          const tr = $(`
+            <tr data-pk="${d.pk}" data-total="${d.preco_unitario}">
+              <td>${d.codigo}</td>
+              <td>${d.variedade}</td>
+              <td class="qty">1</td>
+              <td>${formatBR(d.preco_unitario)}</td>
+              <td class="tot">${formatBR(d.preco_unitario)}</td>
+            </tr>
+          `);
+          $('#cart tbody').append(tr);
+        }
+        updateGrand();
+      }
+
+      $(document).on('keydown', '#scanner', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const code = this.value.trim();
+          if (code) addOrIncrement(code);
+          this.value = '';
+        }
+      });
+    })(django.jQuery);
+  </script>
+{% endblock %}

@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }} - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Estilos existentes */
+    .personalizada-container {
+        padding: 30px;
+        background-color: var(--background-light, #fdfdfd);
+        border-radius: var(--border-radius-lg, 12px);
+        box-shadow: var(--box-shadow-light, 0 4px 10px rgba(0, 0, 0, 0.05));
+        margin-top: 30px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color, #e0e6ed);
+    }
+
+    .personalizada-header {
+        font-size: 2.2rem;
+        color: var(--text-dark, #34495e);
+        font-weight: 600;
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .personalizada-icon {
+        color: var(--secondary-color, #aebdc4);
+        font-size: 2.8rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    /* Estilo para a visualização da etiqueta com proporções */
+    .etiqueta-preview-container {
+        background-color: #f0f0f0;
+        border: 1px dashed var(--border-color);
+        border-radius: var(--border-radius-lg, 12px);
+        padding: 20px;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .etiqueta-preview {
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 10px 20px;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        color: #333;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.9rem; /* Tamanho base da fonte */
+        line-height: 1.2;
+        width: 50mm;
+        height: 15mm;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--border-radius-sm, 5px);
+        box-sizing: border-box;
+        outline: none;
+        cursor: text;
+        min-height: 15mm;
+    }
+    .etiqueta-preview:empty:before {
+        content: "Clique aqui para digitar e formatar o conteúdo...";
+        color: #aaa;
+        font-style: italic;
+    }
+
+    /* Estilos para os botões de formatação */
+    .format-buttons {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center; /* Alinha verticalmente itens no grupo */
+    }
+    .format-buttons .btn {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Estilos específicos para o grupo de botões de tamanho de fonte */
+    .font-size-group {
+        display: flex;
+        border-radius: var(--border-radius-md);
+        overflow: hidden; /* Garante que os cantos arredondados do btn-group sejam aplicados */
+        border: 1px solid var(--border-color); /* Borda ao redor do grupo */
+        margin-left: 10px; /* Espaço entre o negrito e o grupo de fonte */
+    }
+
+    .font-size-group .btn {
+        border-radius: 0; /* Remove bordas arredondadas individuais */
+        border: none; /* Remove bordas internas */
+        border-right: 1px solid var(--border-color); /* Adiciona divisores */
+    }
+
+    .font-size-group .btn:last-child {
+        border-right: none; /* Remove a borda do último botão */
+    }
+
+    /* Estilo para o texto "Tamanho:" */
+    .font-size-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-right: 5px; /* Espaço entre o label e o primeiro botão */
+        align-self: center; /* Alinha o texto no centro verticalmente */
+    }
+
+    /* Responsividade */
+    @media (max-width: 767.98px) {
+        .personalizada-header {
+            font-size: 1.8rem;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        .personalizada-icon {
+            font-size: 2.5rem;
+        }
+        .etiqueta-preview-container {
+            margin-top: 20px;
+            min-height: auto;
+        }
+        .etiqueta-preview {
+            width: 90%;
+            height: auto;
+            min-height: 60px;
+            font-size: 0.8rem;
+        }
+        .format-buttons {
+            flex-direction: column; /* Empilha os botões em telas pequenas */
+            align-items: flex-start; /* Alinha à esquerda quando empilhado */
+        }
+        .font-size-group {
+            margin-left: 0;
+            margin-top: 10px; /* Espaço quando empilhado */
+            width: 100%; /* Ocupa largura total */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid personalizada-container">
+
+    <h2 class="personalizada-header">
+        <i class="fas fa-sliders-h personalizada-icon"></i> {{ page_title }}
+    </h2>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="form-group">
+                <label class="form-label">Opções de Formatação:</label>
+                <div class="format-buttons">
+                    <button type="button" class="btn btn-outline-secondary" id="boldBtn" title="Negrito">
+                        <i class="fas fa-bold"></i> Negrito
+                    </button>
+
+                    <span class="font-size-label">Tamanho:</span>
+                    <div class="btn-group font-size-group" role="group" aria-label="Tamanho da Fonte">
+                        <button type="button" class="btn btn-outline-secondary font-size-btn" data-font-size="0.8">10</button>
+                        <button type="button" class="btn btn-outline-secondary font-size-btn" data-font-size="0.9">12</button>
+                        <button type="button" class="btn btn-outline-secondary font-size-btn" data-font-size="1.0">14</button>
+                        <button type="button" class="btn btn-outline-secondary font-size-btn" data-font-size="1.2">18</button>
+                        <button type="button" class="btn btn-outline-secondary font-size-btn" data-font-size="1.5">24</button>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-warning ml-auto" id="resetFormatBtn" title="Remover Formatação">
+                        <i class="fas fa-undo"></i> Resetar Formatação
+                    </button>
+                </div>
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> **Dica:** Clique na pré-visualização ao lado para digitar o conteúdo e usar os botões de formatação.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="form-group">
+                <label class="form-label">Visualização e Edição da Etiqueta (50mm x 15mm):</label>
+                <div class="etiqueta-preview-container">
+                    <div id="etiquetaPreview" class="etiqueta-preview" contenteditable="true">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        <button type="button" class="btn btn-primary btn-custom-submit" id="downloadPdfButton">
+            <i class="fas fa-file-pdf me-2"></i> Baixar Etiqueta PDF
+        </button>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const etiquetaPreview = document.getElementById('etiquetaPreview');
+        const downloadPdfButton = document.getElementById('downloadPdfButton');
+
+        const boldBtn = document.getElementById('boldBtn');
+        const fontSizeButtons = document.querySelectorAll('.font-size-btn'); // Seleciona todos os botões de tamanho
+        const resetFormatBtn = document.getElementById('resetFormatBtn');
+
+        // VERIFICAÇÃO DE ELEMENTOS:
+        if (!etiquetaPreview || !downloadPdfButton || !boldBtn || !fontSizeButtons.length || !resetFormatBtn) {
+            console.error("Erro: Um ou mais elementos HTML necessários não foram encontrados. Verifique os IDs.");
+            return;
+        }
+
+        // --- Funções de Formatação (Agora usam document.execCommand para negrito e manipulação direta para fonte) ---
+
+        // Executa um comando de formatação no elemento contenteditable
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            etiquetaPreview.focus(); // Mantém o foco no elemento editável após a ação
+        }
+
+        boldBtn.addEventListener('click', function() {
+            formatText('bold'); // Aplica ou remove negrito
+        });
+
+        // Função para aplicar o tamanho da fonte
+        function applyFontSize(sizeRem) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+
+                // Se houver texto selecionado, vamos envolver ou ajustar um span existente
+                if (!range.collapsed) { // Se há texto selecionado
+                    let selectedContent = range.extractContents(); // Extrai o conteúdo selecionado
+                    const newSpan = document.createElement('span');
+                    newSpan.style.fontSize = `${sizeRem}rem`;
+
+                    // Anexa o conteúdo extraído ao novo span
+                    newSpan.appendChild(selectedContent);
+
+                    // Insere o novo span no lugar do conteúdo original
+                    range.insertNode(newSpan);
+
+                    // Re-seleciona o conteúdo dentro do novo span para que futuras operações
+                    // de formatação atuem sobre ele.
+                    selection.removeAllRanges();
+                    const newRange = document.createRange();
+                    newRange.selectNodeContents(newSpan);
+                    selection.addRange(newRange);
+
+                } else { // Se não há seleção, aplica ao elemento raiz ou onde o cursor está
+                    // Esta é a parte mais tricky. Se o cursor está dentro de um texto,
+                    // aplicar o font-size ao contenteditable como um todo pode não ser o que se quer.
+                    // Uma forma mais robusta seria usar document.execCommand('insertHTML', false, `<span style="font-size: ${sizeRem}rem;"></span>`)
+                    // e depois inserir o texto digitado ali, mas isso é mais complexo.
+                    // Para simplificar, vamos aplicar ao elemento mais próximo ou ao preview.
+                    etiquetaPreview.style.fontSize = `${sizeRem}rem`;
+                }
+            } else {
+                // Se não há seleção, aplica o tamanho da fonte ao próprio elemento de pré-visualização.
+                // Isso afeta todo o conteúdo existente e o que será digitado a seguir.
+                etiquetaPreview.style.fontSize = `${sizeRem}rem`;
+            }
+            etiquetaPreview.focus();
+        }
+
+        // Adiciona listeners para os botões de tamanho de fonte
+        fontSizeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const size = parseFloat(this.dataset.fontSize); // Pega o valor de 'data-font-size'
+                applyFontSize(size);
+            });
+        });
+
+        resetFormatBtn.addEventListener('click', function() {
+            // Remove toda a formatação padrão (negrito, itálico, etc.)
+            formatText('removeFormat');
+            // Remove qualquer estilo 'font-size' inline do elemento principal da pré-visualização
+            etiquetaPreview.style.fontSize = ''; // Remove o estilo inline
+            // Se houver spans de font-size dentro do conteúdo, remove-os também
+            let content = etiquetaPreview.innerHTML;
+            // Regex para remover <span style="font-size: ...;"> e </span>, mantendo o conteúdo
+            content = content.replace(/<span\s+style="font-size:\s*[^;]+;">(.*?)<\/span>/gis, '$1');
+            etiquetaPreview.innerHTML = content;
+
+            etiquetaPreview.focus();
+        });
+
+
+        // Função para gerar e baixar o PDF (mantida como está)
+        downloadPdfButton.addEventListener('click', async function() {
+            downloadPdfButton.disabled = true;
+            downloadPdfButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando PDF...';
+
+            const labelWidthMm = 50;
+            const labelHeightMm = 15;
+
+            try {
+                // html2canvas funciona bem com contenteditable, pois ele renderiza o DOM atual
+                const canvas = await html2canvas(etiquetaPreview, {
+                    scale: 4, // Aumenta a escala para melhorar a qualidade do PDF
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+
+                const pdf = new window.jspdf.jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: [labelWidthMm, labelHeightMm]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, labelWidthMm, labelHeightMm);
+                pdf.save('etiqueta_personalizada.pdf');
+
+            } catch (error) {
+                console.error("Erro ao gerar PDF:", error);
+                alert("Ocorreu um erro ao gerar o PDF. Verifique o console do navegador para mais detalhes.");
+            } finally {
+                downloadPdfButton.disabled = false;
+                downloadPdfButton.innerHTML = '<i class="fas fa-file-pdf me-2"></i> Baixar Etiqueta PDF';
+            }
+        });
+
+        // Para lidar com quebras de linha quando o usuário aperta Enter em contenteditable
+        // Por padrão, navegadores podem inserir <div> ou <p> ao invés de <br>.
+        etiquetaPreview.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Impede o comportamento padrão do Enter
+                document.execCommand('insertHTML', false, '<br>'); // Insere uma quebra de linha
+            }
+        });
+    });
+</script>
+{% endblock %}

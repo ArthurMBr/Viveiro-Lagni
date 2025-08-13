@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Etiquetas - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Variáveis e estilos do base.html já devem ser aplicados */
+    /* Você pode adicionar estilos específicos aqui se precisar */
+
+    .etiquetas-container {
+        padding: 30px;
+        background-color: var(--background-light, #fdfdfd); /* Usar variável ou fallback */
+        border-radius: var(--border-radius-lg, 12px);
+        box-shadow: var(--box-shadow-light, 0 4px 10px rgba(0, 0, 0, 0.05));
+        margin-top: 30px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color, #e0e6ed);
+    }
+
+    .etiquetas-header {
+        font-size: 2.2rem;
+        color: var(--text-dark, #34495e);
+        font-weight: 600;
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: center; /* Centralizar título */
+        text-align: center;
+    }
+
+    .etiquetas-icon {
+        color: var(--primary-color, #79a37c);
+        font-size: 2.8rem;
+    }
+
+    .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 3 colunas em desktop, responsivo */
+        gap: 25px; /* Espaçamento entre os botões */
+        justify-content: center;
+        max-width: 900px; /* Largura máxima para a grade de botões */
+        margin: 0 auto; /* Centraliza a grade */
+    }
+
+    .etiquetas-button-card {
+        background-color: #ffffff;
+        border-radius: var(--border-radius-lg, 12px);
+        box-shadow: var(--box-shadow-light, 0 4px 10px rgba(0, 0, 0, 0.08));
+        padding: 30px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-dark, #333);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 180px; /* Altura mínima para os cards */
+        border: 1px solid var(--border-color, #e0e6ed);
+    }
+
+    .etiquetas-button-card:hover {
+        transform: translateY(-8px); /* Sobe um pouco no hover */
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); /* Sombra mais intensa no hover */
+    }
+
+    .etiquetas-button-card .icon {
+        font-size: 3.5rem; /* Ícones maiores */
+        margin-bottom: 15px;
+    }
+
+    .etiquetas-button-card h3 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-dark, #333);
+    }
+
+    .etiquetas-button-card p {
+        font-size: 0.95rem;
+        color: var(--text-light, #6c7a89);
+        line-height: 1.4;
+    }
+
+    /* Cores específicas para cada botão (opcional, mas bom para identificação) */
+    .btn-novo-lote .icon { color: var(--primary-color, #79a37c); }
+    .btn-lote-existente .icon { color: var(--accent-color, #f7b731); }
+    .btn-personalizada .icon { color: var(--secondary-color, #aebdc4); }
+
+    /* Responsividade para telas menores */
+    @media (max-width: 767.98px) {
+        .etiquetas-header {
+            font-size: 1.8rem;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        .etiquetas-icon {
+            font-size: 2.5rem;
+        }
+        .etiquetas-button-card {
+            padding: 25px;
+            min-height: 160px;
+        }
+        .etiquetas-button-card .icon {
+            font-size: 3rem;
+        }
+        .etiquetas-button-card h3 {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid etiquetas-container">
+
+    <h2 class="etiquetas-header">
+        <i class="fas fa-tags etiquetas-icon"></i> Geração de Etiquetas
+    </h2>
+
+    <div class="button-grid">
+          <a href="{% url 'lotes:lote_create' %}" class="etiquetas-button-card btn-novo-lote">
+            <i class="fas fa-plus-circle icon"></i>
+            <h3>Novo Lote</h3>
+            <p>Crie etiquetas para um novo lote de produtos.</p>
+        </a>
+
+        <a href="{% url 'etiquetas:buscar_lote_existente' %}" class="etiquetas-button-card btn-lote-existente">
+            <i class="fas fa-boxes icon"></i>
+            <h3>Lote Já Existente</h3>
+            <p>Gere etiquetas a partir de informações de um lote já cadastrado.</p>
+        </a>
+
+        <a href="{% url 'etiquetas:personalizada' %}" class="etiquetas-button-card btn-personalizada">
+            <i class="fas fa-sliders-h icon"></i>
+            <h3>Personalizada</h3>
+            <p>Crie etiquetas com informações personalizadas.</p>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

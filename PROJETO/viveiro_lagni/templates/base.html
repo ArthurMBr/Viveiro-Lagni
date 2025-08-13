@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Painel Administrativo Viveiro Lagni{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'admin/img/icon-changelist.svg' %}" alt="Logo Viveiro" style="vertical-align: middle; margin-right: 10px; height: 24px;">
+        Administração Viveiro Lagni
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_custom.css' %}">
+    <script src="{% static 'js/admin_custom.js' %}"></script>
+{% endblock %}
+
+{% block footer %}
+    <div id="footer">
+        Desenvolvido com &#10084; por [Seu Nome/Empresa]
+    </div>
+{% endblock %}
+
+<style>
+    /* Opcional: CSS inline para ajustes rápidos */
+    #header {
+        background-color: #4CAF50; /* Um verde suave para o cabeçalho */
+        color: white;
+    }
+    #site-name a {
+        color: white;
+    }
+    #site-name a:hover {
+        color: #e0e0e0;
+    }
+    .module h2, .module caption, .grp-module h2, .grp-module caption {
+        background: #66BB6A; /* Um verde um pouco mais claro para títulos de módulos */
+    }
+    /* Estilo para o footer customizado */
+    #footer {
+        text-align: center;
+        padding: 10px;
+        color: #777;
+        font-size: 0.9em;
+        margin-top: 20px;
+    }
+</style>

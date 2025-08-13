@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+{% load produtores_extras %} {# Para o filtro get_item #}
+
+{% block title %}Detalhes do Produtor Rural{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h1 class="mb-0">Detalhes do Produtor Rural</h1>
+    </div>
+    <div class="card-body">
+        {% if produtor_rural %}
+            <div class="mb-4">
+                <h4 class="text-primary">Informações do Produtor</h4>
+                <p><strong class="info-label">Nome/Razão Social:</strong> <span class="info-value">{{ produtor_rural.nome_fantasia|default:'' }}{% if produtor_rural.nome_fantasia and produtor_rural.razao_social %} ({{ produtor_rural.razao_social }}){% elif not produtor_rural.nome_fantasia %}{{ produtor_rural.razao_social }}{% endif %}</span></p>
+                <p><strong class="info-label">CPF/CNPJ:</strong> <span class="info-value">{{ produtor_rural.cpf_cnpj }}</span></p>
+                {% if produtor_rural.rg %}<p><strong class="info-label">RG:</strong> <span class="info-value">{{ produtor_rural.rg }}</span></p>{% endif %}
+                {% if produtor_rural.inscricao_estadual %}<p><strong class="info-label">Inscrição Estadual:</strong> <span class="info-value">{{ produtor_rural.inscricao_estadual }}</span></p>{% endif %}
+                {% if produtor_rural.email_contato %}<p><strong class="info-label">E-mail:</strong> <span class="info-value">{{ produtor_rural.email_contato }}</span></p>{% endif %}
+                {% if produtor_rural.telefone_principal %}<p><strong class="info-label">Telefone Principal:</strong> <span class="info-value">{{ produtor_rural.telefone_principal }}</span></p>{% endif %}
+                {% if produtor_rural.telefone_secundario %}<p><strong class="info-label">Telefone Secundário:</strong> <span class="info-value">{{ produtor_rural.telefone_secundario }}</span></p>{% endif %}
+                {% if produtor_rural.endereco %}<p><strong class="info-label">Endereço:</strong> <span class="info-value">{{ produtor_rural.endereco }}, {{ produtor_rural.numero }}{% if produtor_rural.complemento %} - {{ produtor_rural.complemento }}{% endif %} - {{ produtor_rural.bairro }}, {{ produtor_rural.cidade }} - {{ produtor_rural.estado }} - CEP: {{ produtor_rural.cep }}</span></p>{% endif %}
+                {% if produtor_rural.renasem %}<p><strong class="info-label">RENASEM:</strong> <span class="info-value">{{ produtor_rural.renasem }}</span></p>{% endif %}
+                {% if produtor_rural.funrural_recolhimento_tipo %}<p><strong class="info-label">Recolhimento FUNRURAL:</strong> <span class="info-value">{{ produtor_rural.get_funrural_recolhimento_tipo_display }}</span></p>{% endif %}
+                {% if produtor_rural.certificado_digital_produtor_arquivo %}
+                    <p><strong class="info-label">Certificado Digital (Produtor):</strong> <span class="info-value"><a href="{{ produtor_rural.certificado_digital_produtor_arquivo.url }}" target="_blank">{{ produtor_rural.certificado_digital_produtor_arquivo.name|cut:"produtor/"|cut:"certificados/"|cut:"media/"|cut:produtor_rural.cpf_cnpj|cut:"_" }}</a> (Validade: {{ produtor_rural.certificado_digital_produtor_validade|date:"d/m/Y"|default:"N/A" }})</span></p>
+                {% endif %}
+                {% if produtor_rural.observacoes %}<p><strong class="info-label">Observações:</strong> <span class="info-value">{{ produtor_rural.observacoes|linebreaksbr }}</span></p>{% endif %}
+            </div>
+
+            {% if responsaveis_tecnicos %}
+                <h4 class="mt-4 text-primary">Responsáveis Técnicos</h4>
+                <div class="list-group mb-4">
+                    {% for rt in responsaveis_tecnicos %}
+                        <div class="list-group-item list-group-item-action flex-column align-items-start mb-2">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ rt.nome }}</h5>
+                                <small class="text-muted">CPF: {{ rt.cpf }}</small>
+                            </div>
+                            <p class="mb-1"><strong>Registro Profissional:</strong> {{ rt.registro_profissional|default:"N/A" }}</p>
+                            <p class="mb-1"><strong>Telefone:</strong> {{ rt.telefone|default:"N/A" }}</p>
+                            <p class="mb-1"><strong>E-mail:</strong> {{ rt.email|default:"N/A" }}</p>
+                            {% if rt.observacoes %}<p class="mb-1"><small class="text-muted">Obs: {{ rt.observacoes }}</small></p>{% endif %}
+
+                            {% with certificados=certificados_digitais_rt|get_item:rt.pk %}
+                                {% if certificados %}
+                                    <h6 class="mt-3">Certificados Digitais:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        {% for cert in certificados %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="me-auto">
+                                                    {{ cert.nome_arquivo }}
+                                                    {% if cert.data_validade %}<small class="text-muted ms-2">(Válido até: {{ cert.data_validade|date:"d/m/Y" }})</small>{% endif %}
+                                                </div>
+                                                {% if cert.arquivo_pfx %}
+                                                    <a href="{{ cert.arquivo_pfx.url }}" target="_blank" class="badge bg-secondary text-decoration-none">Ver Arquivo</a>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Sem Arquivo</span>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="mt-2 text-muted"><small>Nenhum certificado digital para este responsável técnico.</small></p>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info mt-4" role="alert">
+                    Nenhum Responsável Técnico cadastrado para este produtor.
+                </div>
+            {% endif %}
+
+            <div class="mt-4 text-center d-grid gap-2 d-md-block"> {# Classes para responsividade dos botões #}
+               <a href="{% url 'produtores:gerenciar_produtor_edit' produtor_rural.pk %}" class="btn btn-primary btn-lg me-2">
+                <a href="{% url 'home' %}" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left me-2"></i>Voltar ao Início</a>
+            </div>
+
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Nenhuma informação de produtor rural cadastrada ainda.
+            </div>
+            <div class="mt-3 text-center d-grid gap-2 d-md-block">
+                <a href="{% url 'produtores:gerenciar_produtor' %}" class="btn btn-primary btn-lg me-md-2 mb-2 mb-md-0">
+                    <i class="fas fa-plus-circle me-2"></i>Cadastrar Produtor Rural
+                </a>
+                <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar ao Início
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {# Para o filtro 'get_item' em 'certificados_digitais_rt|get_item:rt.pk': #}
+    {# Se 'get_item' não está em 'widget_tweaks' nem em 'static', você precisará de um filtro customizado. #}
+    {# Por exemplo, em 'produtores/templatetags/produtores_extras.py': #}
+    {# from django import template #}
+    {# register = template.Library() #}
+    {# @register.filter(name='get_item') #}
+    {# def get_item(dictionary, key): #}
+    {#     return dictionary.get(key) #}
+    {# E no template: {% load produtores_extras %} #}
+{% endblock %}

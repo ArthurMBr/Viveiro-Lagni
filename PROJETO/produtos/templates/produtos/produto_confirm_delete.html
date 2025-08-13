@@ -1,0 +1,182 @@
+{% extends 'base.html' %} {# Assumindo que seu template base é 'base.html' e não 'produtos/base.html' #}
+{% load static %} {# Necessário para usar {% static %} se você tiver imagens estáticas ou outros assets no CSS #}
+
+{% block title %}Excluir Produto{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Variáveis CSS para cores e arredondamento (replicadas de produto_list.html para consistência) */
+    :root {
+        --primary-color: #79a37c; /* Um verde-azulado mais suave e pastel */
+        --secondary-color: #aebdc4; /* Um cinza-azulado suave */
+        --accent-color: #f7b731; /* Um amarelo mostarda suave para destaque */
+        --text-dark: #34495e; /* Azul escuro quase preto para textos principais */
+        --text-light: #6c7a89; /* Cinza suave para textos secundários */
+        --background-light: #fdfdfd; /* Branco quase off-white para fundos claros */
+        --border-color: #e0e6ed; /* Borda bem suave */
+        --box-shadow-light: 0 4px 10px rgba(0, 0, 0, 0.05); /* Sombra mais suave */
+        --border-radius-lg: 12px; /* Arredondamento maior para cards e elementos principais */
+        --border-radius-md: 8px; /* Arredondamento médio para botões e inputs */
+        --border-radius-sm: 5px; /* Arredondamento menor para itens internos */
+    }
+
+    body {
+        background-color: #f8f9fa; /* Um cinza muito claro, quase branco, para o fundo */
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Fonte mais moderna */
+        color: var(--text-dark);
+    }
+
+    .delete-container {
+        padding: 30px;
+        min-height: 80vh; /* Garante que o container ocupe boa parte da tela */
+        display: flex;
+        align-items: center; /* Centraliza verticalmente o card */
+        justify-content: center; /* Centraliza horizontalmente o card */
+    }
+
+    .card.delete-card {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-light);
+        background-color: var(--background-light);
+        overflow: hidden; /* Garante que os cantos do card-header fiquem arredondados */
+    }
+
+    .card-header.delete-header {
+        background-color: #dc3545; /* Vermelho forte para exclusão */
+        color: white;
+        padding: 25px;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        border-top-left-radius: var(--border-radius-lg);
+        border-top-right-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px; /* Espaço entre o ícone e o texto */
+    }
+
+    .card-header.delete-header h1 {
+        font-size: 2.2rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .delete-header i {
+        font-size: 2.5rem;
+    }
+
+    .card-body.delete-body {
+        padding: 40px;
+    }
+
+    .delete-body .lead {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        color: var(--text-dark);
+    }
+
+    .delete-body .product-name {
+        color: var(--primary-color); /* Usa a cor primária para o nome do produto */
+        font-weight: 700;
+    }
+
+    .delete-body .irreversible-warning {
+        font-size: 1.1rem;
+        color: #dc3545; /* Vermelho para o aviso de irreversível */
+        font-weight: 600;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Espaço entre os botões */
+    }
+
+    .actions .btn {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .actions .btn i {
+        margin-right: 10px;
+    }
+
+    .btn-confirm-delete {
+        background-color: #dc3545; /* Vermelho para confirmar */
+        border-color: #dc3545;
+        color: white;
+    }
+    .btn-confirm-delete:hover {
+        background-color: #c82333; /* Vermelho mais escuro no hover */
+        border-color: #bd2130;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2); /* Sombra no hover */
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background-color: var(--secondary-color); /* Cinza suave para cancelar */
+        border-color: var(--secondary-color);
+        color: white;
+    }
+    .btn-cancel:hover {
+        background-color: #9aa8b0; /* Cinza mais escuro no hover */
+        border-color: #8c98a0;
+        box-shadow: 0 4px 15px rgba(174, 189, 196, 0.2); /* Sombra no hover */
+        transform: translateY(-2px);
+    }
+
+    /* Responsividade para botões em telas pequenas */
+    @media (min-width: 576px) {
+        .actions {
+            flex-direction: row; /* Volta para linha em telas maiores */
+            justify-content: center;
+            gap: 20px;
+        }
+        .actions .btn {
+            width: auto; /* Permite que o botão se ajuste ao conteúdo */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="delete-container">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card delete-card text-center">
+                <div class="card-header delete-header">
+                    <i class="fas fa-exclamation-triangle"></i> {# Ícone de aviso #}
+                    <h1 class="mb-0">Confirmação de Exclusão</h1>
+                </div>
+                <div class="card-body delete-body">
+                    <p class="lead">Tem certeza que deseja excluir o produto: <br>
+                        <strong class="product-name">{{ object.variedade }} (Código: {{ object.cod }})</strong>?
+                    </p>
+                    <p class="irreversible-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i> Esta ação é irreversível e o produto será removido permanentemente.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="actions">
+                            <button type="submit" class="btn btn-confirm-delete">
+                                <i class="fas fa-trash-alt"></i> Sim, Excluir Produto
+                            </button>
+                            <a href="{% url 'produtos:list' %}" class="btn btn-cancel">
+                                <i class="fas fa-times-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

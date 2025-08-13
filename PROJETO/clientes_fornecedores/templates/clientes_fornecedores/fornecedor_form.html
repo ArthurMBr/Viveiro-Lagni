@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Reset e estilos base */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    .card.main-content {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    
+    .card.main-content:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    h2.page-title {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #1a237e;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        color: #424242;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px 15px;
+        transition: all 0.3s ease-in-out;
+        font-size: 1rem;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        background-color: #f7f9fc;
+    }
+
+    .observacoes-field {
+        min-height: 120px;
+        padding: 15px;
+        background-color: #fcfcfc;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        resize: vertical;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .observacoes-field:focus {
+        background-color: #fff;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25), 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .input-group .form-control {
+        border-right: none;
+    }
+    
+    .input-group .btn-outline-secondary {
+        border-left: none;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border: 1px solid #e0e0e0;
+        background-color: #f1f3f5;
+        color: #555;
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .input-group .btn-outline-secondary:hover {
+        background-color: #e2e6ea;
+        border-color: #dae0e5;
+    }
+
+    .btn-action {
+        padding: 10px 25px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+    
+    .alert {
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    /* Media Queries para responsividade */
+    @media (min-width: 768px) {
+        .card.main-content {
+            padding: 50px;
+        }
+        
+        .form-row-desktop {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row-desktop > .col-md-6 {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="container mt-4 card main-content">
+    <h2 class="page-title">{% if form.instance.pk %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %}</h2>
+    <form method="post" id="fornecedor-form">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="mb-3">
+            <label for="id_cpf_cnpj" class="form-label">CNPJ</label>
+            <div class="input-group">
+                {{ form.cpf_cnpj }}
+                <button class="btn btn-outline-secondary" type="button" id="consultar-cnpj-btn">
+                    <i class="fas fa-search"></i> Consultar
+                </button>
+            </div>
+            <div id="cnpj-feedback" class="form-text"></div>
+            {% if form.cpf_cnpj.errors %}
+                <div class="alert alert-danger mt-1">{{ form.cpf_cnpj.errors|first }}</div>
+            {% endif %}
+        </div>
+        
+        {% for field in form %}
+            {% if field.name != 'cpf_cnpj' and field.name != 'produtos_fornecidos' %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="alert alert-danger mt-1">{{ field.errors|first }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="mb-3">
+            <label for="{{ form.produtos_fornecidos.id_for_label }}" class="form-label">Produtos Fornecidos</label>
+            {{ form.produtos_fornecidos }}
+            {% if form.produtos_fornecidos.errors %}
+                <div class="alert alert-danger mt-1">{{ form.produtos_fornecidos.errors|first }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success btn-action">Salvar</button>
+            <a href="{% url 'clientes_fornecedores:fornecedor_list' %}" class="btn btn-secondary btn-action">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cnpjInput = document.getElementById('id_cpf_cnpj');
+    const consultarBtn = document.getElementById('consultar-cnpj-btn');
+    const cnpjFeedback = document.getElementById('cnpj-feedback');
+
+    consultarBtn.addEventListener('click', function() {
+        const cnpj = cnpjInput.value.replace(/[^\d]/g, '');
+        cnpjFeedback.innerHTML = '';
+        cnpjFeedback.className = 'form-text';
+
+        if (cnpj.length !== 14) {
+            cnpjFeedback.innerHTML = 'Por favor, insira um CNPJ válido com 14 dígitos.';
+            cnpjFeedback.classList.add('text-danger');
+            return;
+        }
+
+        cnpjFeedback.innerHTML = 'Consultando...';
+        cnpjFeedback.classList.remove('text-danger');
+        cnpjFeedback.classList.add('text-primary');
+
+        fetch(`{% url 'clientes_fornecedores:consulta_cnpj_api' %}?cnpj=${cnpj}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => Promise.reject(error));
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('id_nome_empresa').value = data.razao_social || '';
+                document.getElementById('id_endereco').value = data.endereco || '';
+                document.getElementById('id_cidade').value = data.cidade || '';
+                document.getElementById('id_estado').value = data.estado || '';
+                document.getElementById('id_telefone').value = data.telefone || '';
+                document.getElementById('id_email').value = data.email || '';
+                
+                cnpjFeedback.innerHTML = 'Dados preenchidos com sucesso!';
+                cnpjFeedback.classList.remove('text-primary');
+                cnpjFeedback.classList.add('text-success');
+            })
+            .catch(error => {
+                console.error('Erro ao consultar CNPJ:', error);
+                const errorMessage = error.error || 'Erro ao consultar o CNPJ. Tente novamente.';
+                cnpjFeedback.innerHTML = errorMessage;
+                cnpjFeedback.classList.remove('text-primary');
+                cnpjFeedback.classList.add('text-danger');
+            });
+    });
+
+    cnpjInput.addEventListener('input', function() {
+        cnpjFeedback.innerHTML = '';
+        cnpjFeedback.className = 'form-text';
+    });
+});
+</script>
+{% endblock %}

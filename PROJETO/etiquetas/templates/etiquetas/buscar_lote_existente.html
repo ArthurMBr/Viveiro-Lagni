@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Viveiro Lagni{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Estilos para o container principal da página de busca */
+    .search-container {
+        padding: 30px;
+        background-color: var(--background-light, #fdfdfd);
+        border-radius: var(--border-radius-lg, 12px);
+        box-shadow: var(--box-shadow-light, 0 4px 10px rgba(0, 0, 0, 0.05));
+        margin-top: 30px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color, #e0e6ed);
+    }
+
+    /* Estilos para o cabeçalho da página */
+    .search-header {
+        font-size: 2.2rem;
+        color: var(--text-dark, #34495e);
+        font-weight: 600;
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .search-icon {
+        color: var(--secondary-color, #aebdc4); /* Cor para o ícone de lotes */
+        /* Ajustar tamanho e alinhamento conforme necessário */
+    }
+
+    /* Estilos para o campo de busca */
+    .search-input-group {
+        margin-bottom: 30px;
+        border-radius: var(--border-radius-md, 8px);
+        overflow: hidden; /* Garante que os cantos arredondados funcionem com o input-group */
+    }
+
+    .search-input-group .form-control {
+        border: 1px solid var(--border-color, #e0e6ed);
+        border-right: none;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+        box-shadow: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-input-group .form-control:focus {
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .search-input-group .btn {
+        background-color: var(--primary-color, #007bff);
+        color: var(--white, #fff);
+        border: 1px solid var(--primary-color, #007bff);
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .search-input-group .btn:hover {
+        background-color: var(--primary-dark, #0056b3);
+        border-color: var(--primary-dark, #0056b3);
+    }
+
+    /* Estilos para os cartões de lote */
+    .lote-card {
+        border: 1px solid var(--border-color, #e0e6ed);
+        border-radius: var(--border-radius-lg, 12px);
+        background-color: var(--white, #fff);
+        box-shadow: var(--box-shadow-light, 0 4px 8px rgba(0, 0, 0, 0.05));
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .lote-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow-hover, 0 6px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .lote-card .card-title {
+        color: var(--text-dark, #34495e);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .lote-card .card-text {
+        color: var(--text-medium, #5c6773);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .lote-card .card-text strong {
+        color: var(--text-dark, #34495e);
+    }
+
+    .lote-card .btn-info {
+        background-color: var(--info-color, #17a2b8);
+        border-color: var(--info-color, #17a2b8);
+        color: var(--white, #fff);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .lote-card .btn-info:hover {
+        background-color: var(--info-dark, #117a8b);
+        border-color: var(--info-dark, #117a8b);
+    }
+
+    /* Estilos para o modal */
+    #generateLabelModal .modal-header {
+        background-color: var(--primary-color, #007bff);
+        color: var(--white, #fff);
+        border-top-left-radius: var(--border-radius-lg, 12px);
+        border-top-right-radius: var(--border-radius-lg, 12px);
+    }
+
+    #generateLabelModal .modal-title {
+        font-weight: 600;
+    }
+
+    #generateLabelModal .modal-body {
+        padding: 2rem;
+    }
+
+    #generateLabelModal .modal-body p {
+        font-size: 1.1rem;
+        color: var(--text-dark, #34495e);
+        margin-bottom: 0.75rem;
+    }
+
+    #generateLabelModal .modal-body p span {
+        font-weight: 600;
+        color: var(--primary-dark, #0056b3);
+    }
+
+    #generateLabelModal .form-check {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    #generateLabelModal .input-group .form-control {
+        border-right: 1px solid var(--border-color, #e0e6ed); /* Reativa a borda direita */
+    }
+
+    #generateLabelModal .btn-primary {
+        background-color: var(--success-color, #28a745);
+        border-color: var(--success-color, #28a745);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    #generateLabelModal .btn-primary:hover {
+        background-color: var(--success-dark, #1e7e34);
+        border-color: var(--success-dark, #1e7e34);
+    }
+
+    #generateLabelModal .btn-secondary {
+        background-color: var(--light-grey, #6c757d);
+        border-color: var(--light-grey, #6c757d);
+    }
+
+    #generateLabelModal .btn-secondary:hover {
+        background-color: var(--dark-grey, #5a6268);
+        border-color: var(--dark-grey, #5a6268);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container search-container">
+    <h2 class="search-header">
+        <i class="fas fa-seedling search-icon"></i>
+        Buscar Lote Existente
+    </h2>
+
+    <div class="input-group search-input-group mb-4">
+        <input type="text" class="form-control" id="searchInput" placeholder="Buscar por código do lote ou nome do produto...">
+        <button class="btn" type="button" id="searchButton">Buscar</button>
+    </div>
+
+    <div class="row" id="lotesResults">
+        <div class="col-12 text-center text-muted">
+            <p>Digite para buscar lotes...</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="generateLabelModal" tabindex="-1" aria-labelledby="generateLabelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateLabelModalLabel">Gerar Etiqueta para <span id="modalLoteNome"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Lote ID: <span id="modalLoteId"></span></p>
+                <p>Código: <span id="modalLoteCodigo"></span></p>
+                <p>Data de Semeadura: <span id="modalLoteDataSemeadura"></span></p>
+                
+                <p>Quantidade Base do Lote: <span id="modalLoteQuantidadeBase"></span></p>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="addQuantityCheckbox">
+                    <label class="form-check-label" for="addQuantityCheckbox">
+                        Adicionar quantidade
+                    </label>
+                </div>
+
+                <div id="quantityInputContainer" style="display: none;">
+                    <label for="quantityToAddInput" class="form-label">Quantidade a Adicionar:</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="quantityToAddInput" min="1" value="1">
+                        <button class="btn btn-outline-secondary" type="button" id="addQuantityButton">Adicionar</button> 
+                    </div>
+                </div>
+
+                <p class="h5 mt-3">Quantidade Final na Etiqueta: <span id="finalQuantityDisplay"></span></p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="generateLabelBtn">Gerar Etiqueta</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const lotesResultsDiv = document.getElementById('lotesResults');
+        let debounceTimeout;
+
+        // Modal elements
+        const generateLabelModal = new bootstrap.Modal(document.getElementById('generateLabelModal'));
+        const modalLoteId = document.getElementById('modalLoteId');
+        const modalLoteNome = document.getElementById('modalLoteNome');
+        const modalLoteCodigo = document.getElementById('modalLoteCodigo');
+        const modalLoteDataSemeadura = document.getElementById('modalLoteDataSemeadura');
+        const modalLoteQuantidadeBase = document.getElementById('modalLoteQuantidadeBase');
+        const addQuantityCheckbox = document.getElementById('addQuantityCheckbox');
+        const quantityToAddInput = document.getElementById('quantityToAddInput');
+        const quantityInputContainer = document.getElementById('quantityInputContainer');
+        const addQuantityButton = document.getElementById('addQuantityButton'); 
+        const finalQuantityDisplay = document.getElementById('finalQuantityDisplay');
+        const generateLabelBtn = document.getElementById('generateLabelBtn');
+
+        let currentSelectedLote = null; // Para armazenar os dados do lote selecionado
+
+        // --- Funções de Controle do Modal ---
+
+        // Função para atualizar a quantidade final exibida e armazenada
+        function updateFinalQuantity(baseQuantity, additionalQuantity = 0) {
+            let finalQuantity = parseInt(baseQuantity);
+            console.log(`[updateFinalQuantity] Quantidade Base Inicial: ${baseQuantity}, Convertida: ${finalQuantity}`);
+            if (addQuantityCheckbox.checked) {
+                finalQuantity += parseInt(additionalQuantity);
+                console.log(`[updateFinalQuantity] Checkbox marcada. Adicionando ${additionalQuantity}. Nova Quantidade Final: ${finalQuantity}`);
+            } else {
+                console.log(`[updateFinalQuantity] Checkbox desmarcada. Quantidade Final é a Base: ${finalQuantity}`);
+            }
+            finalQuantityDisplay.textContent = finalQuantity;
+            return finalQuantity; // Retorna a quantidade final para uso na URL
+        }
+
+        // Event listener para o checkbox "Adicionar quantidade"
+        addQuantityCheckbox.addEventListener('change', function() {
+            console.log("--- Clique em 'Adicionar quantidade' (Checkbox) ---");
+            if (this.checked) {
+                quantityInputContainer.style.display = 'block'; // Mostra o input e o botão
+                quantityToAddInput.value = 1; // Reseta para 1 ao marcar
+                console.log("Checkbox 'Adicionar quantidade' marcada.");
+            } else {
+                quantityInputContainer.style.display = 'none'; // Esconde
+                console.log("Checkbox 'Adicionar quantidade' desmarcada.");
+            }
+            // Atualiza a quantidade final sempre que o checkbox é alterado
+            const baseQty = currentSelectedLote ? currentSelectedLote.quantidade_raw : 0;
+            const additionalQty = parseInt(quantityToAddInput.value) || 0;
+            console.log(`[Checkbox Change] Chamando updateFinalQuantity com Base: ${baseQty}, Adicional: ${additionalQty}`);
+            updateFinalQuantity(baseQty, additionalQty);
+        });
+
+        // Event listener para o botão "Adicionar"
+        addQuantityButton.addEventListener('click', function() {
+            console.log("--- Clique em 'Adicionar' (Botão) ---");
+            const baseQty = currentSelectedLote ? currentSelectedLote.quantidade_raw : 0;
+            const additionalQty = parseInt(quantityToAddInput.value) || 0;
+
+            console.log(`[Botão Adicionar] Quantidade Base (currentSelectedLote.quantidade_raw): ${baseQty}`);
+            console.log(`[Botão Adicionar] Quantidade a Adicionar (do input): ${quantityToAddInput.value}, parseada: ${additionalQty}`);
+
+
+            if (isNaN(additionalQty) || additionalQty < 0) {
+                alert("Por favor, digite uma quantidade válida e positiva para adicionar.");
+                quantityToAddInput.value = 0; // Limpa o input se for inválido
+                updateFinalQuantity(baseQty, 0); // Reseta para a quantidade base
+                return;
+            }
+            updateFinalQuantity(baseQty, additionalQty);
+            console.log(`[Botão Adicionar] Soma realizada. Quantidade Final após adição: ${finalQuantityDisplay.textContent}`);
+        });
+
+        // Event listener para o input de quantidade (para recalcular se o valor for alterado manualmente)
+        quantityToAddInput.addEventListener('input', function() {
+            console.log(`[Input Quantidade] Valor alterado manualmente: ${this.value}`);
+            const baseQty = currentSelectedLote ? currentSelectedLote.quantidade_raw : 0;
+            const additionalQty = parseInt(this.value) || 0;
+            console.log(`[Input Quantidade] Chamando updateFinalQuantity com Base: ${baseQty}, Adicional: ${additionalQty}`);
+            updateFinalQuantity(baseQty, additionalQty);
+        });
+
+
+        // Event listener para o botão 'Gerar Etiqueta' dentro do modal
+        generateLabelBtn.addEventListener('click', function() {
+            console.log("--- Clique em 'Gerar Etiqueta' (Modal) ---");
+            if (!currentSelectedLote) {
+                alert("Nenhum lote selecionado para gerar etiqueta.");
+                return;
+            }
+
+            const loteId = currentSelectedLote.id;
+            const baseQuantity = currentSelectedLote.quantidade_raw;
+            let finalQuantity = baseQuantity;
+
+            console.log(`[Gerar Etiqueta] ID do Lote Selecionado: ${loteId}`);
+            console.log(`[Gerar Etiqueta] Quantidade Base do Lote (currentSelectedLoteQuantidadeBase): ${baseQuantity}`);
+            console.log(`[Gerar Etiqueta] Checkbox 'Adicionar quantidade' marcada? ${addQuantityCheckbox.checked}`);
+
+            if (addQuantityCheckbox.checked) {
+                console.log("[Gerar Etiqueta] Checkbox 'Adicionar quantidade' está marcada.");
+                const quantityToAddStr = quantityToAddInput.value;
+                console.log(`[Gerar Etiqueta] Valor no campo 'Quantidade a Adicionar': ${quantityToAddStr}`);
+                const quantityToAdd = parseInt(quantityToAddStr);
+
+                if (isNaN(quantityToAdd) || quantityToAdd < 0) {
+                    alert("Por favor, digite uma quantidade válida e positiva para adicionar.");
+                    return;
+                }
+                console.log(`[Gerar Etiqueta] Quantidade Adicional (parseada): ${quantityToAdd}`);
+                finalQuantity = baseQuantity + quantityToAdd;
+                console.log(`[Gerar Etiqueta] Soma realizada. Quantidade Final após adição: ${finalQuantity}`);
+            } else {
+                console.log("[Gerar Etiqueta] Checkbox 'Adicionar quantidade' NÃO está marcada. Usando quantidade base.");
+            }
+            
+            console.log(`[Gerar Etiqueta] Quantidade Final que será enviada para a URL: ${finalQuantity}`);
+
+            // Monta a URL para a geração da etiqueta
+            const labelUrl = `${currentSelectedLote.url_etiqueta}?quantidade=${finalQuantity}`;
+            console.log(`[Gerar Etiqueta] URL da Etiqueta Gerada: ${labelUrl}`);
+            
+            // Abre a etiqueta em uma nova aba
+            window.open(labelUrl, '_blank');
+            generateLabelModal.hide(); // Esconde o modal após gerar
+        });
+
+        // Event listener para o botão "Gerar Etiqueta" da lista de lotes (fora do modal)
+        lotesResultsDiv.addEventListener('click', function(event) {
+            if (event.target.classList.contains('generate-label-btn')) {
+                const button = event.target;
+                const loteId = button.dataset.loteId;
+                const loteNome = button.dataset.loteNome;
+                const loteCodigo = button.dataset.loteCodigo;
+                const loteDataSemeadura = button.dataset.loteDataSemeadura;
+                const loteQuantidadeBase = button.dataset.loteQuantidadeBase;
+                const loteUnidadeMedida = button.dataset.loteUnidadeMedida;
+                const loteUrlEtiqueta = button.dataset.loteUrlEtiqueta;
+
+                currentSelectedLote = {
+                    id: loteId,
+                    nome: loteNome,
+                    codigo: loteCodigo,
+                    data_semeadura: loteDataSemeadura,
+                    quantidade_raw: parseInt(loteQuantidadeBase), // Importante: armazenar como número
+                    unidade_medida: loteUnidadeMedida,
+                    url_etiqueta: loteUrlEtiqueta
+                };
+                console.log("[Abrir Modal] currentSelectedLote definido:", currentSelectedLote);
+
+
+                modalLoteId.textContent = currentSelectedLote.id;
+                modalLoteNome.textContent = currentSelectedLote.nome;
+                modalLoteCodigo.textContent = currentSelectedLote.codigo;
+                modalLoteDataSemeadura.textContent = currentSelectedLote.data_semeadura;
+                modalLoteQuantidadeBase.textContent = `${currentSelectedLote.quantidade_raw} ${currentSelectedLote.unidade_medida}`;
+                
+                // Reseta o estado do checkbox e input ao abrir o modal
+                addQuantityCheckbox.checked = false;
+                quantityInputContainer.style.display = 'none';
+                quantityToAddInput.value = 1; // Valor padrão ao abrir
+                
+                // Atualiza a exibição da quantidade final para a quantidade base
+                console.log(`[Abrir Modal] Chamando updateFinalQuantity com base: ${currentSelectedLote.quantidade_raw}, adicional: 0`);
+                updateFinalQuantity(currentSelectedLote.quantidade_raw, 0);
+
+
+                generateLabelModal.show();
+            }
+        });
+
+        // --- Função para buscar lotes da API ---
+        function fetchLotes(query = '') {
+            const url = `{% url 'lotes:listar_lotes_api' %}?search=${encodeURIComponent(query)}`;
+            console.log("Buscando lotes da API... URL:", url);
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na rede ou na API: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Array de lotes para iteração:", data.lotes); // Debugging
+                    lotesResultsDiv.innerHTML = ''; // Limpa resultados anteriores
+
+                    if (data.lotes && data.lotes.length > 0) {
+                        data.lotes.forEach(lote => {
+                            const loteCard = document.createElement('div');
+                            loteCard.className = 'col-md-6 mb-4';
+                            loteCard.innerHTML = `
+                                <div class="card h-100 shadow-sm lote-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">${lote.produto_nome}</h5>
+                                        <p class="card-text"><strong>Lote:</strong> ${lote.codigo}</p>
+                                        <p class="card-text"><strong>Semeadura:</strong> ${lote.data_semeadura}</p>
+                                        <p class="card-text"><strong>Qtd:</strong> ${lote.quantidade_display}</p>
+                                        <div class="d-flex justify-content-end align-items-center">
+                                            <button 
+                                                class="btn btn-sm btn-info generate-label-btn"
+                                                data-lote-id="${lote.id}"
+                                                data-lote-nome="${lote.produto_nome}"
+                                                data-lote-codigo="${lote.codigo}"
+                                                data-lote-data-semeadura="${lote.data_semeadura}"
+                                                data-lote-quantidade-base="${lote.quantidade_raw}"
+                                                data-lote-unidade-medida="${lote.unidade_medida}"
+                                                data-lote-url-etiqueta="${lote.url_etiqueta}"
+                                            >
+                                                Gerar Etiqueta
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            lotesResultsDiv.appendChild(loteCard);
+                        });
+                    } else {
+                        lotesResultsDiv.innerHTML = '<div class="col-12"><p class="text-muted">Nenhum lote encontrado.</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar lotes:', error);
+                    lotesResultsDiv.innerHTML = '<div class="col-12"><p class="text-danger">Erro ao carregar lotes. Tente novamente mais tarde.</p></div>';
+                });
+        }
+
+        // Adiciona um listener para o campo de busca com debounce
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimeout); // Limpa o timeout anterior
+            debounceTimeout = setTimeout(() => {
+                const query = searchInput.value;
+                fetchLotes(query); // Chama a busca após um pequeno atraso
+            }, 300); // Debounce de 300ms (ajustável)
+        });
+
+        // Carrega todos os lotes ao carregar a página pela primeira vez
+        fetchLotes();
+    });
+</script>
+{% endblock %}

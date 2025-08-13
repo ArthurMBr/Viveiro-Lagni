@@ -1,0 +1,544 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load produtores_extras %} {# Certifique-se de que este filtro customizado está em produtores/templatetags/produtores_extras.py #}
+
+{% block title %}{% if produtor_rural %}Editar{% else %}Cadastrar{% endif %} Produtor Rural{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h1 class="mb-0">{% if produtor_rural %}Editar{% else %}Cadastrar{% endif %} Produtor Rural</h1>
+    </div>
+    <div class="card-body">
+        {% if erro_geral %}
+            <div class="alert alert-danger" role="alert">
+                {{ erro_geral }}
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data"> {# Necessário para upload de arquivos #}
+            {% csrf_token %}
+
+            {# Erros não relacionados a campos específicos do formulário principal #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <ul class="nav nav-tabs mb-4" id="produtorTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="produtor-tab" data-bs-toggle="tab" data-bs-target="#produtor-info" type="button" role="tab" aria-controls="produtor-info" aria-selected="true">Informações do Produtor</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="responsaveis-tab" data-bs-toggle="tab" data-bs-target="#responsaveis-tecnicos" type="button" role="tab" aria-controls="responsaveis-tecnicos" aria-selected="false">Responsáveis Técnicos</button>
+                </li>
+                {# Se houver abas para certificados, pode criar aqui, mas a abordagem atual é aninhar #}
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="produtor-info" role="tabpanel" aria-labelledby="produtor-tab">
+                    <h4 class="mb-3">Dados Principais</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.tipo_pessoa.id_for_label }}" class="form-label">{{ form.tipo_pessoa.label }}</label>
+                            {% render_field form.tipo_pessoa class="form-select" %}
+                            {% if form.tipo_pessoa.errors %}<div class="invalid-feedback d-block">{{ form.tipo_pessoa.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.cpf_cnpj.id_for_label }}" class="form-label">{{ form.cpf_cnpj.label }} <span class="text-danger">*</span></label>
+                            {% render_field form.cpf_cnpj class="form-control" %}
+                            {% if form.cpf_cnpj.errors %}<div class="invalid-feedback d-block">{{ form.cpf_cnpj.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.nome_fantasia.id_for_label }}" class="form-label">{{ form.nome_fantasia.label }}</label>
+                            {% render_field form.nome_fantasia class="form-control" %}
+                            {% if form.nome_fantasia.errors %}<div class="invalid-feedback d-block">{{ form.nome_fantasia.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.razao_social.id_for_label }}" class="form-label">{{ form.razao_social.label }}</label>
+                            {% render_field form.razao_social class="form-control" %}
+                            {% if form.razao_social.errors %}<div class="invalid-feedback d-block">{{ form.razao_social.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.rg.id_for_label }}" class="form-label">{{ form.rg.label }}</label>
+                            {% render_field form.rg class="form-control" %}
+                            {% if form.rg.errors %}<div class="invalid-feedback d-block">{{ form.rg.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.inscricao_estadual.id_for_label }}" class="form-label">{{ form.inscricao_estadual.label }}</label>
+                            {% render_field form.inscricao_estadual class="form-control" %}
+                            {% if form.inscricao_estadual.errors %}<div class="invalid-feedback d-block">{{ form.inscricao_estadual.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Contato</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.email_contato.id_for_label }}" class="form-label">{{ form.email_contato.label }}</label>
+                            {% render_field form.email_contato class="form-control" %}
+                            {% if form.email_contato.errors %}<div class="invalid-feedback d-block">{{ form.email_contato.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.telefone_principal.id_for_label }}" class="form-label">{{ form.telefone_principal.label }}</label>
+                            {% render_field form.telefone_principal class="form-control" %}
+                            {% if form.telefone_principal.errors %}<div class="invalid-feedback d-block">{{ form.telefone_principal.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.telefone_secundario.id_for_label }}" class="form-label">{{ form.telefone_secundario.label }}</label>
+                            {% render_field form.telefone_secundario class="form-control" %}
+                            {% if form.telefone_secundario.errors %}<div class="invalid-feedback d-block">{{ form.telefone_secundario.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Endereço</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-4 mb-3">
+                            <label for="{{ form.cep.id_for_label }}" class="form-label">{{ form.cep.label }}</label>
+                            {% render_field form.cep class="form-control" %}
+                            {% if form.cep.errors %}<div class="invalid-feedback d-block">{{ form.cep.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-8 mb-3">
+                            <label for="{{ form.endereco.id_for_label }}" class="form-label">{{ form.endereco.label }}</label>
+                            {% render_field form.endereco class="form-control" %}
+                            {% if form.endereco.errors %}<div class="invalid-feedback d-block">{{ form.endereco.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-4 mb-3">
+                            <label for="{{ form.numero.id_for_label }}" class="form-label">{{ form.numero.label }}</label>
+                            {% render_field form.numero class="form-control" %}
+                            {% if form.numero.errors %}<div class="invalid-feedback d-block">{{ form.numero.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-4 mb-3">
+                            <label for="{{ form.complemento.id_for_label }}" class="form-label">{{ form.complemento.label }}</label>
+                            {% render_field form.complemento class="form-control" %}
+                            {% if form.complemento.errors %}<div class="invalid-feedback d-block">{{ form.complemento.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-4 mb-3">
+                            <label for="{{ form.bairro.id_for_label }}" class="form-label">{{ form.bairro.label }}</label>
+                            {% render_field form.bairro class="form-control" %}
+                            {% if form.bairro.errors %}<div class="invalid-feedback d-block">{{ form.bairro.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.cidade.id_for_label }}" class="form-label">{{ form.cidade.label }}</label>
+                            {% render_field form.cidade class="form-control" %}
+                            {% if form.cidade.errors %}<div class="invalid-feedback d-block">{{ form.cidade.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                            {% render_field form.estado class="form-control" %}
+                            {% if form.estado.errors %}<div class="invalid-feedback d-block">{{ form.estado.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Outras Informações</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.renasem.id_for_label }}" class="form-label">{{ form.renasem.label }}</label>
+                            {% render_field form.renasem class="form-control" %}
+                            {% if form.renasem.errors %}<div class="invalid-feedback d-block">{{ form.renasem.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.funrural_recolhimento_tipo.id_for_label }}" class="form-label">{{ form.funrural_recolhimento_tipo.label }}</label>
+                            {% render_field form.funrural_recolhimento_tipo class="form-select" %}
+                            {% if form.funrural_recolhimento_tipo.errors %}<div class="invalid-feedback d-block">{{ form.funrural_recolhimento_tipo.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Certificado Digital do Produtor</h4>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.certificado_digital_produtor_arquivo.id_for_label }}" class="form-label">{{ form.certificado_digital_produtor_arquivo.label }}</label>
+                            {% render_field form.certificado_digital_produtor_arquivo class="form-control" %}
+                            {% if form.certificado_digital_produtor_arquivo.errors %}<div class="invalid-feedback d-block">{{ form.certificado_digital_produtor_arquivo.errors }}</div>{% endif %}
+                            {% if form.instance.certificado_digital_produtor_arquivo %}
+                                <p class="form-text text-muted">Arquivo atual: <a href="{{ form.instance.certificado_digital_produtor_arquivo.url }}" target="_blank">{{ form.instance.certificado_digital_produtor_arquivo.name|cut:"produtor/"|cut:"certificados/"|cut:"media/"|cut:produtor_rural.cpf_cnpj|cut:"_" }}</a></p>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.certificado_digital_produtor_senha.id_for_label }}" class="form-label">{{ form.certificado_digital_produtor_senha.label }}</label>
+                            {% render_field form.certificado_digital_produtor_senha class="form-control" %}
+                            {% if form.certificado_digital_produtor_senha.errors %}<div class="invalid-feedback d-block">{{ form.certificado_digital_produtor_senha.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="{{ form.certificado_digital_produtor_validade.id_for_label }}" class="form-label">{{ form.certificado_digital_produtor_validade.label }}</label>
+                            {% render_field form.certificado_digital_produtor_validade class="form-control" %}
+                            {% if form.certificado_digital_produtor_validade.errors %}<div class="invalid-feedback d-block">{{ form.certificado_digital_produtor_validade.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.observacoes.id_for_label }}" class="form-label">{{ form.observacoes.label }}</label>
+                        {% render_field form.observacoes class="form-control" %}
+                        {% if form.observacoes.errors %}<div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>{% endif %}
+                    </div>
+
+                    {# Campos ocultos para data de cadastro/atualização #}
+                    {{ form.data_cadastro }}
+                    {{ form.data_atualizacao }}
+                </div>
+
+                <div class="tab-pane fade" id="responsaveis-tecnicos" role="tabpanel" aria-labelledby="responsaveis-tab">
+                    <h4 class="mb-3">Responsáveis Técnicos Registrados</h4>
+                    {{ formset_rt.management_form }}
+
+                    {# Erros não relacionados a formulários específicos do formset de RT #}
+                    {% if formset_rt.non_form_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in formset_rt.non_form_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div id="rt-formset-container">
+                        {% for rt_form in formset_rt %}
+                            <div class="formset-item p-3 mb-3 border rounded">
+                                <h5 class="border-bottom pb-2 mb-3">Responsável Técnico #{{ forloop.counter }}
+                                    {% if rt_form.instance.pk %}
+                                        <small class="text-muted ms-2">(ID: {{ rt_form.instance.pk }})</small>
+                                    {% endif %}
+                                    <div class="form-check form-switch float-end">
+                                        <input type="checkbox" name="{{ rt_form.DELETE.name }}" id="{{ rt_form.DELETE.id_for_label }}" class="form-check-input">
+                                        <label class="form-check-label text-danger" for="{{ rt_form.DELETE.id_for_label }}">Remover</label>
+                                    </div>
+                                </h5>
+
+                                {# Erros específicos deste formulário de RT #}
+                                {% if rt_form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {% for error in rt_form.non_field_errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="row">
+                                    <div class="col-12 col-md-6 mb-3">
+                                        <label for="{{ rt_form.nome.id_for_label }}" class="form-label">{{ rt_form.nome.label }} <span class="text-danger">*</span></label>
+                                        {% render_field rt_form.nome class="form-control" %}
+                                        {% if rt_form.nome.errors %}<div class="invalid-feedback d-block">{{ rt_form.nome.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-12 col-md-6 mb-3">
+                                        <label for="{{ rt_form.cpf.id_for_label }}" class="form-label">{{ rt_form.cpf.label }} <span class="text-danger">*</span></label>
+                                        {% render_field rt_form.cpf class="form-control" %}
+                                        {% if rt_form.cpf.errors %}<div class="invalid-feedback d-block">{{ rt_form.cpf.errors }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 mb-3">
+                                        <label for="{{ rt_form.registro_profissional.id_for_label }}" class="form-label">{{ rt_form.registro_profissional.label }}</label>
+                                        {% render_field rt_form.registro_profissional class="form-control" %}
+                                        {% if rt_form.registro_profissional.errors %}<div class="invalid-feedback d-block">{{ rt_form.registro_profissional.errors }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-12 col-md-6 mb-3">
+                                        <label for="{{ rt_form.telefone.id_for_label }}" class="form-label">{{ rt_form.telefone.label }}</label>
+                                        {% render_field rt_form.telefone class="form-control" %}
+                                        {% if rt_form.telefone.errors %}<div class="invalid-feedback d-block">{{ rt_form.telefone.errors }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ rt_form.email.id_for_label }}" class="form-label">{{ rt_form.email.label }}</label>
+                                    {% render_field rt_form.email class="form-control" %}
+                                    {% if rt_form.email.errors %}<div class="invalid-feedback d-block">{{ rt_form.email.errors }}</div>{% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ rt_form.observacoes.id_for_label }}" class="form-label">{{ rt_form.observacoes.label }}</label>
+                                    {% render_field rt_form.observacoes class="form-control" %}
+                                    {% if rt_form.observacoes.errors %}<div class="invalid-feedback d-block">{{ rt_form.observacoes.errors }}</div>{% endif %}
+                                </div>
+                                {{ rt_form.id }} {# Campo hidden para o ID da instância existente #}
+
+                                <h6 class="mt-4 border-top pt-3">Certificados Digitais deste RT</h6>
+                                {# Renderiza o management_form para o formset de certificado deste RT #}
+                                {% with cert_formset=formsets_cert_rt|get_item:rt_form.instance.pk %}
+                                    {{ cert_formset.management_form }}
+                                    
+                                    {# Erros não relacionados a formulários específicos do formset de certificado #}
+                                    {% if cert_formset.non_form_errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in cert_formset.non_form_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    <div id="cert-formset-container-{{ rt_form.instance.pk }}">
+                                        {% for cert_form in cert_formset %}
+                                            {% if cert_form.instance.pk or cert_form.is_bound %} {# Para mostrar forms existentes ou novos com dados preenchidos #}
+                                                <div class="formset-item-inner p-2 mb-2 border rounded bg-light">
+                                                    <h6 class="border-bottom pb-2 mb-3">Certificado #{{ forloop.counter }}
+                                                        {% if cert_form.instance.pk %}
+                                                            <small class="text-muted ms-2">(ID: {{ cert_form.instance.pk }})</small>
+                                                        {% endif %}
+                                                        <div class="form-check form-switch float-end">
+                                                            <input type="checkbox" name="{{ cert_form.DELETE.name }}" id="{{ cert_form.DELETE.id_for_label }}" class="form-check-input">
+                                                            <label class="form-check-label text-danger" for="{{ cert_form.DELETE.id_for_for_label }}">Remover</label>
+                                                        </div>
+                                                    </h6>
+
+                                                    {# Erros específicos deste formulário de Certificado #}
+                                                    {% if cert_form.non_field_errors %}
+                                                        <div class="alert alert-danger">
+                                                            {% for error in cert_form.non_field_errors %}
+                                                                {{ error }}
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+
+                                                    <div class="mb-2">
+                                                        <label for="{{ cert_form.nome_arquivo.id_for_label }}" class="form-label">{{ cert_form.nome_arquivo.label }}</label>
+                                                        {% render_field cert_form.nome_arquivo class="form-control" %}
+                                                        {% if cert_form.nome_arquivo.errors %}<div class="invalid-feedback d-block">{{ cert_form.nome_arquivo.errors }}</div>{% endif %}
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label for="{{ cert_form.arquivo_pfx.id_for_label }}" class="form-label">{{ cert_form.arquivo_pfx.label }}</label>
+                                                        {% render_field cert_form.arquivo_pfx class="form-control" %}
+                                                        {% if cert_form.arquivo_pfx.errors %}<div class="invalid-feedback d-block">{{ cert_form.arquivo_pfx.errors }}</div>{% endif %}
+                                                        {% if cert_form.instance.arquivo_pfx %}
+                                                            <p class="form-text text-muted">Arquivo atual: <a href="{{ cert_form.instance.arquivo_pfx.url }}" target="_blank">{{ cert_form.instance.arquivo_pfx.name|cut:"responsavel_tecnico/"|cut:"certificados/"|cut:"media/"|cut:rt_form.instance.cpf|cut:"_" }}</a></p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label for="{{ cert_form.senha_pfx.id_for_label }}" class="form-label">{{ cert_form.senha_pfx.label }}</label>
+                                                        {% render_field cert_form.senha_pfx class="form-control" %}
+                                                        {% if cert_form.senha_pfx.errors %}<div class="invalid-feedback d-block">{{ cert_form.senha_pfx.errors }}</div>{% endif %}
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label for="{{ cert_form.data_validade.id_for_label }}" class="form-label">{{ cert_form.data_validade.label }}</label>
+                                                        {% render_field cert_form.data_validade class="form-control" %}
+                                                        {% if cert_form.data_validade.errors %}<div class="invalid-feedback d-block">{{ cert_form.data_validade.errors }}</div>{% endif %}
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label for="{{ cert_form.observacoes.id_for_label }}" class="form-label">{{ cert_form.observacoes.label }}</label>
+                                                        {% render_field cert_form.observacoes class="form-control" %}
+                                                        {% if cert_form.observacoes.errors %}<div class="invalid-feedback d-block">{{ cert_form.observacoes.errors }}</div>{% endif %}
+                                                    </div>
+                                                    {{ cert_form.id }} {# Hidden ID field for existing instances #}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <button type="button" class="btn btn-outline-success btn-sm mt-2 add-cert-form" data-rt-pk="{{ rt_form.instance.pk }}" data-cert-prefix="cert-rt-{{ rt_form.instance.pk }}">Adicionar Certificado</button>
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-success mt-3" id="add-rt-form">Adicionar Responsável Técnico</button>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary btn-lg me-2"><i class="fas fa-save me-2"></i>Salvar Produtor</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left me-2"></i>Voltar ao Início</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lógica para adicionar novos formulários de Responsável Técnico
+            const addRtButton = document.getElementById('add-rt-form');
+            const rtContainer = document.getElementById('rt-formset-container');
+            const totalRtForms = document.querySelector('#id_rt-TOTAL_FORMS');
+
+            addRtButton.addEventListener('click', function() {
+                const currentRtForms = parseInt(totalRtForms.value);
+                // O empty_form para RT é gerado pelo Django e está disponível.
+                // Acessamos o HTML pré-renderizado do empty_form do ResponsavelTecnicoFormSet.
+                const emptyRtFormTemplate = `
+                    <div class="formset-item p-3 mb-3 border rounded">
+                        <h5 class="border-bottom pb-2 mb-3">Responsável Técnico #${currentRtForms + 1}
+                            <div class="form-check form-switch float-end">
+                                <input type="checkbox" name="rt-${currentRtForms}-DELETE" id="id_rt-${currentRtForms}-DELETE" class="form-check-input">
+                                <label class="form-check-label text-danger" for="id_rt-${currentRtForms}-DELETE">Remover</label>
+                            </div>
+                        </h5>
+                        {# AQUI VOCÊ DEVE TER O HTML DO EMPTY FORM DO RT. #}
+                        {# COMO VOCÊ ESTÁ USANDO {{ formset_rt.empty_form.as_p }} EM JS, #}
+                        {# ELE PRECISA SER ACESSÍVEL. Uma forma é passá-lo como JSON no contexto ou renderizar em um <template> tag. #}
+                        {# Por simplicidade para o exemplo JS, vou recriar a estrutura de campos básica, MAS O IDEAL É RENDERIZAR O empty_form DO DJANGO #}
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="id_rt-${currentRtForms}-nome" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                                <input type="text" name="rt-${currentRtForms}-nome" id="id_rt-${currentRtForms}-nome" class="form-control">
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="id_rt-${currentRtForms}-cpf" class="form-label">CPF <span class="text-danger">*</span></label>
+                                <input type="text" name="rt-${currentRtForms}-cpf" id="id_rt-${currentRtForms}-cpf" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="id_rt-${currentRtForms}-registro_profissional" class="form-label">Registro Profissional (Ex: CREA/CAU)</label>
+                                <input type="text" name="rt-${currentRtForms}-registro_profissional" id="id_rt-${currentRtForms}-registro_profissional" class="form-control">
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="id_rt-${currentRtForms}-telefone" class="form-label">Telefone de Contato</label>
+                                <input type="text" name="rt-${currentRtForms}-telefone" id="id_rt-${currentRtForms}-telefone" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_rt-${currentRtForms}-email" class="form-label">E-mail de Contato</label>
+                            <input type="email" name="rt-${currentRtForms}-email" id="id_rt-${currentRtForms}-email" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_rt-${currentRtForms}-observacoes" class="form-label">Observações do Responsável Técnico</label>
+                            <textarea name="rt-${currentRtForms}-observacoes" id="id_rt-${currentRtForms}-observacoes" class="form-control"></textarea>
+                        </div>
+                        <input type="hidden" name="rt-${currentRtForms}-id" id="id_rt-${currentRtForms}-id">
+
+                        <h6 class="mt-4 border-top pt-3">Certificados Digitais deste RT</h6>
+                        <div id="cert-formset-container-new-rt-${currentRtForms}">
+                            {# Este será o container para os certificados do NOVO RT #}
+                        </div>
+                        <input type="hidden" name="cert-rt-new-rt-${currentRtForms}-TOTAL_FORMS" id="id_cert-rt-new-rt-${currentRtForms}-TOTAL_FORMS" value="0">
+                        <input type="hidden" name="cert-rt-new-rt-${currentRtForms}-INITIAL_FORMS" id="id_cert-rt-new-rt-${currentRtForms}-INITIAL_FORMS" value="0">
+                        <input type="hidden" name="cert-rt-new-rt-${currentRtForms}-MIN_NUM_FORMS" id="id_cert-rt-new-rt-${currentRtForms}-MIN_NUM_FORMS" value="0">
+                        <input type="hidden" name="cert-rt-new-rt-${currentRtForms}-MAX_NUM_FORMS" id="id_cert-rt-new-rt-${currentRtForms}-MAX_NUM_FORMS" value="1000">
+
+                        <button type="button" class="btn btn-outline-success btn-sm mt-2 add-cert-form" data-rt-pk="new-rt-${currentRtForms}" data-cert-prefix="cert-rt-new-rt-${currentRtForms}">Adicionar Certificado</button>
+                    </div>
+                `;
+                rtContainer.insertAdjacentHTML('beforeend', emptyRtFormTemplate);
+                totalRtForms.value = currentRtForms + 1;
+            });
+
+
+            // Lógica para adicionar novos formulários de Certificado Digital para cada RT
+            // (Isso agora é um evento delegado, pois os botões são adicionados dinamicamente)
+            document.querySelectorAll('.add-cert-form').forEach(button => {
+                button.addEventListener('click', function() {
+                    const rtPk = this.dataset.rtPk;
+                    const certPrefix = this.dataset.certPrefix; // Ex: cert-rt-1 ou cert-rt-new-rt-0
+                    const certFormsetContainer = document.getElementById(`cert-formset-container-${rtPk}`);
+                    const totalCertForms = document.querySelector(`#id_${certPrefix}-TOTAL_FORMS`);
+                    
+                    if (!totalCertForms) {
+                        console.error(`TOTAL_FORMS not found for prefix: ${certPrefix}`);
+                        return;
+                    }
+
+                    const currentCertForms = parseInt(totalCertForms.value);
+                    
+                    // O empty_form para Certificado Digital é passado do Django para o JavaScript.
+                    // Isso é mais robusto pois o Django renderiza os widgets, IDs, etc.
+                    let emptyCertFormTemplate = `{{ cert_empty_form_template|escapejs }}`; // Escapar para JS
+
+                    // Substituir o prefixo genérico '__prefix__' pelo índice real
+                    // e o prefixo do RT específico.
+                    // Assumimos que o empty_form tem um __prefix__ para o próprio formset
+                    // e que o prefixo completo do Certificado é 'cert-rt-<RT_PK>-__prefix__'.
+                    emptyCertFormTemplate = emptyCertFormTemplate.replace(/__prefix__/g, currentCertForms);
+                    // Adicionei um placeholder adicional no template python renderizado para o id do RT
+                    // para o caso de "new-rt". Mas o cert_empty_form_template já tem o prefixo
+                    // correto 'cert-rt-__prefix__-...'
+
+                    // Ajustar os nomes e IDs dos campos do certificado digital para o RT correto
+                    // Ex: id_cert-rt-1-__prefix__-nome_arquivo
+                    // Se o empty_form já vem com o prefixo completo do Certificado:
+                    // <label for="id_cert-rt-__prefix__-nome_arquivo">
+                    // <input name="cert-rt-__prefix__-nome_arquivo" id="id_cert-rt-__prefix__-nome_arquivo">
+
+                    // A melhor abordagem é que o Django renderize o empty_form *com o prefixo correto do pai RT*.
+                    // Mas como passamos um genérico `CertificadoDigitalResponsavelInlineFormSet().empty_form.as_p()`
+                    // precisamos adaptar.
+                    
+                    // Opção 1 (mais simples para agora, mas menos robusta se o HTML for complexo):
+                    // Criar o HTML manualmente ou com uma string template mais controlada.
+                    const newCertFormHtml = `
+                        <div class="formset-item-inner p-2 mb-2 border rounded bg-light">
+                            <h6 class="border-bottom pb-2 mb-3">Certificado #${currentCertForms + 1}
+                                <div class="form-check form-switch float-end">
+                                    <input type="checkbox" name="${certPrefix}-${currentCertForms}-DELETE" id="id_${certPrefix}-${currentCertForms}-DELETE" class="form-check-input">
+                                    <label class="form-check-label text-danger" for="id_${certPrefix}-${currentCertForms}-DELETE">Remover</label>
+                                </div>
+                            </h6>
+                            <div class="mb-2">
+                                <label for="id_${certPrefix}-${currentCertForms}-nome_arquivo" class="form-label">Nome do Arquivo</label>
+                                <input type="text" name="${certPrefix}-${currentCertForms}-nome_arquivo" id="id_${certPrefix}-${currentCertForms}-nome_arquivo" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label for="id_${certPrefix}-${currentCertForms}-arquivo_pfx" class="form-label">Arquivo Certificado (.pfx)</label>
+                                <input type="file" name="${certPrefix}-${currentCertForms}-arquivo_pfx" id="id_${certPrefix}-${currentCertForms}-arquivo_pfx" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label for="id_${certPrefix}-${currentCertForms}-senha_pfx" class="form-label">Senha do Certificado</label>
+                                <input type="password" name="${certPrefix}-${currentCertForms}-senha_pfx" id="id_${certPrefix}-${currentCertForms}-senha_pfx" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label for="id_${certPrefix}-${currentCertForms}-data_validade" class="form-label">Data de Validade</label>
+                                <input type="date" name="${certPrefix}-${currentCertForms}-data_validade" id="id_${certPrefix}-${currentCertForms}-data_validade" class="form-control">
+                            </div>
+                            <div class="mb-2">
+                                <label for="id_${certPrefix}-${currentCertForms}-observacoes" class="form-label">Observações do Certificado</label>
+                                <textarea name="${certPrefix}-${currentCertForms}-observacoes" id="id_${certPrefix}-${currentCertForms}-observacoes" class="form-control"></textarea>
+                            </div>
+                            <input type="hidden" name="${certPrefix}-${currentCertForms}-id" id="id_${certPrefix}-${currentCertForms}-id">
+                        </div>
+                    `;
+                    
+                    certFormsetContainer.insertAdjacentHTML('beforeend', newCertFormHtml);
+                    totalCertForms.value = currentCertForms + 1; // Incrementa o TOTAL_FORMS
+                });
+            });
+
+
+            // Lógica para abas (já deve estar no seu base.html ou Bootstrap JS)
+            var triggerTabList = [].slice.call(document.querySelectorAll('#produtorTabs button'))
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl)
+
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault()
+                    tabTrigger.show()
+                })
+            });
+
+            // Mostrar a aba correta se houver erros em uma aba específica
+            {% if form.errors or form.non_field_errors %}
+                var produtorTab = new bootstrap.Tab(document.getElementById('produtor-tab'));
+                produtorTab.show();
+            {% elif formset_rt.errors or formset_rt.non_form_errors %}
+                var responsaveisTab = new bootstrap.Tab(document.getElementById('responsaveis-tab'));
+                responsaveisTab.show();
+            {% elif request.session.active_tab %}
+                var activeTab = new bootstrap.Tab(document.getElementById('{{ request.session.active_tab }}'));
+                activeTab.show();
+                {% comment %} Limpa a sessão para não reativar na próxima visita {% endcomment %}
+            {% else %}
+                {# Se não houver erros e nenhuma aba ativa na sessão, mantenha a aba padrão ativa (produtor-info) #}
+                var produtorTab = new bootstrap.Tab(document.getElementById('produtor-tab'));
+                produtorTab.show();
+            {% endif %}
+        });
+    </script>
+    {# Este é o `produtores_extras` para o filtro `get_item`, você deve tê-lo em `produtores/templatetags/produtores_extras.py` #}
+    {% comment %}
+    Exemplo de `produtores_extras.py`:
+    from django import template
+    register = template.Library()
+
+    @register.filter(name='get_item')
+    def get_item(dictionary, key):
+        return dictionary.get(key)
+    {% endcomment %}
+{% endblock %}

@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Viveiro Lagni{% endblock %}</title>
+
+    {# Bootstrap 4.5.2 CSS #}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {# Font Awesome para os ícones #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    {# Seu CSS personalizado #}
+    <link rel="stylesheet" href="{% static 'produtos/css/style.css' %}">
+
+    {# Este bloco é para CSS/meta tags adicionais de templates filhos #}
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        /* Definição das variáveis CSS */
+        :root {
+            --primary-color: #6d9f71; /* Verde esmeralda suave */
+            --header-text-color: white; /* Cor do texto do cabeçalho */
+        }
+
+        /* Estilo personalizado para a faixa superior (header) */
+        .app-header {
+            background-color: var(--primary-color); /* Usa a variável para a cor de fundo */
+            color: var(--header-text-color); /* Usa a variável para a cor do texto */
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,.08);
+        }
+
+        .app-header .navbar-brand {
+            color: var(--header-text-color);
+            font-weight: bold;
+            font-size: 1.75rem;
+        }
+
+        .app-header .navbar-nav .nav-link {
+            color: var(--header-text-color);
+            font-weight: 500;
+            margin-left: 1rem;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .app-header .navbar-nav .nav-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Estilo para o rodapé */
+        .app-footer {
+            background-color: #f8f9fa; /* Cor de fundo clara */
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Container de mensagens */
+        .messages-container {
+            position: fixed;
+            top: 70px; /* Ajuste para não ficar atrás do cabeçalho */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            z-index: 1050; /* Garante que fique acima de outros elementos */
+            opacity: 0.95;
+        }
+
+        .messages-container .alert {
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,.1);
+        }
+        .messages-container .alert .close {
+            color: inherit; /* Garante que o 'x' tenha a mesma cor do texto do alert */
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-dark container">
+            <a class="navbar-brand" href="{% url 'produtos:list' %}">Viveiro Lagni</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'produtos:list' %}">Produtos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'produtos:create' %}">Cadastrar Produto</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content container mt-5">
+        {# Exibição de mensagens do Django #}
+        {% if messages %}
+            <div class="messages-container my-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %} Viveiro Lagni. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    {# jQuery, Popper.js e Bootstrap JS (nessa ordem!) #}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    {# Este bloco é para scripts JS adicionais de templates filhos #}
+    {# Ele deve vir DEPOIS dos scripts base (jQuery, Bootstrap) #}
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

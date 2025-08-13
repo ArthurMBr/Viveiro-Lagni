@@ -1,0 +1,370 @@
+/* style.css */
+
+/* Estilos globais/body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e9ecef; /* Um cinza claro */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1; /* Garante que o conteúdo principal ocupe o espaço restante */
+}
+
+/* Header e Navbar (já estilizados pelo Bootstrap) */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Cards em geral */
+.card {
+    border-radius: 0.75rem;
+    overflow: hidden; /* Garante que bordas arredondadas funcionem com bg-image */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    border-bottom: none;
+    padding: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Botões */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529; /* Cor do texto para contraste */
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    border-radius: 0.5rem 0.5rem 0 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    background-color: #fff;
+}
+
+.tab-content {
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 0.75rem 0.75rem;
+    padding: 1.5rem;
+    background-color: #fff;
+}
+
+/* Fieldsets e Formulários */
+fieldset {
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #f8f9fa; /* Um cinza muito claro para o fundo do fieldset */
+}
+
+legend {
+    width: auto; /* Para que a borda da legenda se ajuste ao texto */
+    padding: 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #007bff;
+    border-bottom: none;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #343a40;
+}
+
+.form-control, .form-select {
+    border-radius: 0.4rem;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Estilos específicos para formsets inline (Responsáveis Técnicos, Certificados) */
+.formset-item, .cert-formset-item {
+    background-color: #fefefe;
+    border: 1px solid #e2e6ea;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.03);
+}
+
+.formset-item h6, .cert-formset-item h6 {
+    color: #007bff;
+    font-size: 1.1rem;
+    border-bottom: 1px dashed #e2e6ea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.text-danger {
+    font-size: 0.875rem;
+}
+
+/* Mensagens de erro de campo */
+.text-danger {
+    color: #dc3545 !important;
+    font-size: 0.875em;
+    margin-top: 0.25em;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40 !important; /* Cor mais escura para o rodapé */
+    color: #adb5bd;
+    padding: 1.5rem 0;
+    text-align: center;
+    margin-top: auto; /* Empurra o footer para o final da página */
+}
+
+/* Estilos para a página de detalhes do produtor */
+.info-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    display: block; /* Para que o label ocupe sua própria linha */
+}
+.info-value {
+    margin-bottom: 0.75rem;
+    color: #212529;
+}
+.list-group-item-custom {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+}
+
+/* Dashboard cards (do seu tela_inicial.html) */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px; /* Altura mínima para os cards */
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card .icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.75rem;
+    color: #007bff; /* Cor padrão para ícones */
+}
+
+.dashboard-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+}
+
+.dashboard-card p {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* Cores específicas para os ícones e cards do dashboard */
+.dashboard-card.produtores .icon { color: #28a745; } /* verde */
+.dashboard-card.produtos .icon { color: #6f42c1; } /* roxo */
+.dashboard-card.lotes .icon { color: #fd7e14; } /* laranja */
+.dashboard-card.clientes .icon { color: #17a2b8; } /* azul turquesa */
+.dashboard-card.relatorios .icon { color: #dc3545; } /* vermelho */
+.dashboard-card.admin .icon { color: #6c757d; } /* cinza */
+
+/* Estilos para a tela de PDV (Caixa) */
+#pdv-container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.05);
+}
+
+.item-pedido-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.item-pedido-row .form-group {
+    flex: 1; /* Faz os campos crescerem e ocuparem espaço */
+}
+
+.item-pedido-row .form-control {
+    width: 100%; /* Garante que os inputs preencham o grupo */
+}
+
+.item-pedido-row .remove-item-btn {
+    flex-shrink: 0; /* Impede que o botão encolha */
+    font-size: 1.25rem;
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.item-pedido-row .remove-item-btn:hover {
+    color: #bd2130;
+}
+
+.summary-card {
+    background-color: #e6f7ff; /* Azul claro para o card de resumo */
+    border-color: #b3e6ff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.03);
+}
+
+.summary-card h5 {
+    color: #007bff;
+    border-bottom: 1px dashed #b3e6ff;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.summary-card p {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card .total-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* Estilos para a tabela de itens no PDV */
+#itemsTable th, #itemsTable td {
+    vertical-align: middle;
+}
+
+#itemsTable tbody tr:nth-child(even) {
+    background-color: #f2f2f2; /* zebra striping */
+}
+
+#itemsTable tbody tr:hover {
+    background-color: #e9e9e9;
+}
+
+
+/* Estilos para lista de pedidos */
+.table-responsive {
+    margin-top: 1.5rem;
+}
+
+.table.pedidos-table th, .table.pedidos-table td {
+    vertical-align: middle;
+}
+
+.table.pedidos-table thead th {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.table.pedidos-table tbody tr:hover {
+    background-color: #e2f0ff;
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+    border-radius: 0.375rem;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.badge-concluido {
+    background-color: #28a745; /* green */
+    color: white;
+}
+
+.badge-pendente {
+    background-color: #ffc107; /* yellow */
+    color: #212529;
+}
+
+.badge-cancelado {
+    background-color: #dc3545; /* red */
+    color: white;
+}

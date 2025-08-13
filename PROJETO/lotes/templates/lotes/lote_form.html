@@ -1,0 +1,287 @@
+{# PROJETO/lotes/templates/lotes/lote_form.html #}
+{% extends "lotes/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{% if action %}{{ action }}{% else %}Detalhes do Lote{% endif %}{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <style>
+        /* Variáveis de cor (redundantes se já estiverem em base.html, mas mantidas por segurança) */
+        :root {
+            --primary-color: #6d9f71; /* Verde esmeralda suave */
+            --primary-dark-color: #5b875e; /* Verde mais escuro para hover */
+            --secondary-color: #f0ad4e; /* Amarelo/Laranja para destaque secundário */
+            --secondary-dark-color: #ec971f; /* Amarelo/Laranja mais escuro para hover */
+            --light-bg: #f8fcf8; /* Fundo muito claro, quase branco esverdeado */
+            --card-bg: #ffffff; /* Fundo branco para cards e linhas da tabela */
+            --border-color: #e0e6e0; /* Cor da borda suave esverdeada */
+            --text-color: #3f5e43; /* Verde escuro para o texto padrão */
+            --header-text-color: #ffffff; /* Cor do texto do cabeçalho da tabela */
+            --success-color: #5cb85c; /* Verde para sucesso */
+            --danger-color: #d9534f; /* Vermelho para ações de perigo */
+            --info-color: #5bc0de; /* Azul/Ciano para informações (badges e botões) */
+            --shadow-color-primary: rgba(109, 159, 113, 0.3); /* Sombra para primário */
+            --shadow-color-secondary: rgba(240, 173, 78, 0.3); /* Sombra para secundário */
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* Estilos para o card do formulário */
+        .form-card {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Sombra mais pronunciada */
+            border-radius: 1rem; /* Cantos bem arredondados */
+            overflow: hidden;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-card .card-header {
+            background-color: var(--primary-color); /* Verde primário */
+            color: var(--header-text-color);
+            font-size: 1.8rem; /* Título maior */
+            font-weight: 700;
+            padding: 1.8rem 2.5rem; /* Mais padding */
+            border-bottom: none;
+            border-top-left-radius: 1rem; /* Arredonda cantos do header */
+            border-top-right-radius: 1rem;
+        }
+        /* Ajuste do header do card para mobile */
+        @media (max-width: 575.98px) {
+            .form-card .card-header {
+                font-size: 1.5rem;
+                padding: 1.2rem 1.5rem;
+            }
+        }
+
+        .form-card .card-body {
+            padding: 2.5rem; /* Mais padding no corpo */
+        }
+        /* Ajuste do body do card para mobile */
+        @media (max-width: 575.98px) {
+            .form-card .card-body {
+                padding: 1.5rem;
+            }
+        }
+
+
+        .form-group-custom {
+            margin-bottom: 1.8rem; /* Espaçamento entre os grupos de campo */
+        }
+        /* Ajuste do margin-bottom para mobile */
+        @media (max-width: 575.98px) {
+            .form-group-custom {
+                margin-bottom: 1.2rem;
+            }
+        }
+
+        .form-group-custom label {
+            font-weight: 600; /* Labels mais negritas */
+            color: var(--text-color);
+            margin-bottom: 0.6rem;
+            display: block;
+            font-size: 1.05rem;
+        }
+        /* Ajuste da fonte do label para mobile */
+        @media (max-width: 575.98px) {
+            .form-group-custom label {
+                font-size: 1rem;
+                margin-bottom: 0.4rem;
+            }
+        }
+
+        .form-group-custom .form-control {
+            border-radius: 0.6rem; /* Cantos arredondados para inputs */
+            padding: 0.85rem 1.2rem; /* Padding interno maior */
+            border: 1px solid var(--border-color);
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        /* Ajuste do padding do input para mobile */
+        @media (max-width: 575.98px) {
+            .form-group-custom .form-control {
+                padding: 0.7rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+
+        .form-group-custom .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem var(--shadow-color-primary);
+            background-color: white;
+        }
+        
+        .form-group-custom .form-control.is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .form-group-custom .invalid-feedback {
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+            color: var(--danger-color);
+        }
+
+        /* Botões de ação */
+        .btn-form-submit {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--header-text-color);
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 5px 15px var(--shadow-color-primary);
+            transition: all 0.2s ease-in-out;
+            margin-right: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-form-submit:hover {
+            background-color: var(--primary-dark-color);
+            border-color: var(--primary-dark-color);
+            color: var(--header-text-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--shadow-color-primary);
+        }
+
+        .btn-form-cancel {
+            background-color: #6c757d; /* Cinza para cancelar */
+            border-color: #6c757d;
+            color: white;
+            font-weight: 500;
+            padding: 0.8rem 2rem;
+            border-radius: 0.6rem;
+            box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-form-cancel:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-form-submit svg, .btn-form-cancel svg {
+            width: 18px;
+            height: 18px;
+        }
+        /* Ajuste dos botões de ação do formulário para mobile */
+        @media (max-width: 575.98px) {
+            .btn-form-submit, .btn-form-cancel {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 0.8rem; /* Espaço entre os botões quando empilhados */
+                font-size: 0.95rem;
+                padding: 0.7rem 1.5rem;
+            }
+            .d-flex.justify-content-end.mt-4 { /* O container dos botões */
+                flex-direction: column; /* Empilha os botões */
+                align-items: stretch; /* Estica os botões para a largura total */
+            }
+        }
+
+
+        .form-help-text {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 0.4rem;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            border-radius: 0.6rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container my-5 px-3 px-md-4"> {# Adiciona padding responsivo aqui #}
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="card form-card">
+                    <div class="card-header">
+                        {% if action %}
+                            {{ action }}
+                        {% else %}
+                            Formulário de Lote
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            {% for field in form.visible_fields %}
+                                <div class="form-group-custom">
+                                    {{ field.label_tag }}
+                                    {{ field|add_class:"form-control"|add_error_class:"is-invalid" }} 
+
+                                    {% if field.help_text %}
+                                        <div class="form-text form-help-text">{{ field.help_text }}</div>
+                                    {% endif %}
+
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn btn-form-submit">
+                                    <i class="bi bi-save-fill"></i>
+                                    Salvar Lote
+                                </button>
+                                <a href="{% url 'lotes:lote_list' %}" class="btn btn-form-cancel">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_body %}
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+{% endblock %}

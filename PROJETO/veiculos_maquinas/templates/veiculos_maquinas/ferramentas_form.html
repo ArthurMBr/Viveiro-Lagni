@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% load static %}
+
+{% block extra_head %}
+    {# Carrega o CSS geral do app para o container #}
+    <link rel="stylesheet" href="{% static 'css/veiculos_maquinas.css' %}">
+    {# Carrega o CSS ESPECÍFICO para formulários #}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ page_title }}</h2>
+    <div class="card p-4 shadow-sm">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="{% url 'veiculos_maquinas:manutencao_list' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
